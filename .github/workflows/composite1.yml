@@ -6,12 +6,7 @@ on:
           - main
         paths:
           - .github/workflows/*
-          - src/composite1/**
-        inputs:
-            publish: true
-            configuration: Release
-            verbosity: minimal
-            
+          - src/composite1/**            
 
     pull_request:    
         branches:
@@ -21,10 +16,6 @@ on:
           - reopened
           - synchronize 
           #- closed
-        inputs:
-            publish: true
-            configuration: Release
-            verbosity: minimal
 
     workflow_dispatch:
         inputs:  
@@ -56,6 +47,9 @@ jobs:
   
     outputs:      
       versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
+      configuration : ${{ steps.parameters.outputs.configuration }}
+      verbosity : ${{ steps.parameters.outputs.verbosity }}
+      publish : ${{ steps.parameters.outputs.publish }}
 
     steps:
     - name: Setting up parameters
@@ -64,18 +58,33 @@ jobs:
       run: |
         Write-Host "Setting up parameters"
         $suffixMap = @{"push"="alpha"; "pull_request"="beta"; "workflow_dispatch"=""};
-        $suffix = $suffixMap['${{github.event_name}}']
-        #$inputfallback = @{"push"="alpha"; "pull_request"="beta"; "workflow_dispatch"=""};
-        Write-Host "event verbosity ${{github.event.inputs.verbosity}}"
+        #$suffix = $suffixMap['${{github.event_name}}']
 
-        echo "::set-output name=versionSuffix::$($suffix)"
+        if(${{github.event_name}} -eq 'workflow_dispatch'){
+            echo "::set-output name=configuration::${{github.event.inputs.configuration}}"
+            echo "::set-output name=verbosity::${{github.event.inputs.verbosity}}"
+            echo "::set-output name=publish::${{github.event.inputs.publish}}"
+
+        } else  {
+            echo "::set-output name=configuration::Release"
+            echo "::set-output name=verbosity::Minimal"
+            echo "::set-output name=publish::true"
+        }
+
+        echo "::set-output name=versionSuffix::$($suffixMap['${{github.event_name}}'])"
 
     - name: printing printing parameters
       shell: pwsh
       run: |
         Write-Host "versionSuffix: $($env:versionSuffix)"
+        Write-Host "publish: $($env:publish)"
+        Write-Host "verbosity: $($env:verbosity)"
+        Write-Host "configuration: $($env:configuration)"
       env:        
         versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}        
+        publish : ${{ steps.parameters.outputs.publish }}        
+        verbosity : ${{ steps.parameters.outputs.verbosity }}        
+        configuration : ${{ steps.parameters.outputs.configuration }}        
 
   main:
     needs: parameters

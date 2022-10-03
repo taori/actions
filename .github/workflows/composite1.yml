@@ -11,16 +11,17 @@ on:
     pull_request:    
         branches:
           - main
-        paths:
-          - .github/workflows/*
-          - src/composite1/**
         types: 
           - opened
           - reopened
           - synchronize 
           #- closed
 
-    workflow_dispatch:  
+    workflow_dispatch:
+      inputs:        
+        publish:
+        required: true
+        type: boolean
 
 jobs:
   parameters:
@@ -32,23 +33,17 @@ jobs:
     steps:
     - name: Setting up parameters
       id: parameters
-      #if: ${{ github.event_name == "workflow_dispatch" }}
       shell: pwsh
       run: |
-        Write-Host "Setting variables"
-        Write-Host "eventName: ${{github.event_name}}"
+        Write-Host "Setting up parameters"
         echo "::set-output name=versionSuffix::${{github.event_name}}"
 
-    - name: printing environment
-      #if: ${{ github.event_name == "workflow_dispatch" }}
+    - name: printing printing parameters
       shell: pwsh
       run: |
-        Write-Host $env:versionSuffix
+        Write-Host "versionSuffix: $($env:versionSuffix)"
       env:        
-        versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
-
-    - name: stop
-      run: exit 1
+        versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}        
 
   main:
     needs: parameters

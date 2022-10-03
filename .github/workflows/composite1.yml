@@ -1,4 +1,4 @@
-name: main
+name: CI
 
 on: 
     push:
@@ -105,7 +105,7 @@ jobs:
         publishSymbols : ${{ steps.parameters.outputs.publishSymbols }}        
         removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}        
 
-  main:
+  package:
     needs: parameters
     uses: taori/actions/.github/workflows/nupkg.yml@main
     with:

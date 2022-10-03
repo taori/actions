@@ -100,7 +100,7 @@ jobs:
       run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/${{ inputs.packageId }} --no-build /p:VersionSuffix=$versionSuffix
 
     - name: Remove snupkg
-      if: ${{ inputs.publishSymbols }}
+      if: ${{ !inputs.publishSymbols }}
       run: find artifacts/${{ inputs.packageId }}/ -name "*.snupkg" -type f -delete
       
     - name: Release

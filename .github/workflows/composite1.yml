@@ -30,13 +30,14 @@ jobs:
       versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
 
     steps:
-    - name: Setting up environment
+    - name: Setting up parameters
       id: parameters
       #if: ${{ github.event_name == "workflow_dispatch" }}
       shell: pwsh
       run: |
         Write-Host "Setting variables"
-        echo "::set-output name=versionSuffix::${{ github.event_name }}"
+        Write-Host "eventName: ${{github.event_name}}"
+        echo "::set-output name=versionSuffix::${{github.event_name}}"
 
     - name: printing environment
       #if: ${{ github.event_name == "workflow_dispatch" }}

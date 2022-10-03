@@ -18,10 +18,25 @@ on:
           #- closed
 
     workflow_dispatch:
-        inputs:        
+        inputs:  
+        
             publish:
-            required: true
-            type: boolean
+                required: true
+                type: boolean
+
+            configuration:
+                required: false
+                type: choice
+                options:
+                - Debug
+                - Release
+
+            verbosity:
+                required: false
+                type: choice
+                options:
+                - Debug
+                - Release
 
 jobs:
   parameters:

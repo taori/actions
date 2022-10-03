@@ -67,7 +67,7 @@ jobs:
         } else  {
             echo "::set-output name=configuration::Release"
             echo "::set-output name=verbosity::Minimal"
-            echo "::set-output name=publish::true"
+            echo "::set-output name=publish::$true"
         }
 
         echo "::set-output name=versionSuffix::$($suffixMap['${{github.event_name}}'])"

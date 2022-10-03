@@ -74,9 +74,13 @@ jobs:
       run: |
         Write-Host "Setting up parameters"
 
-        $suffixMap = @{"push"="alpha${{github.run_number}}"; "pull_request"="beta${{github.run_number}}"; "workflow_dispatch"="${{github.event.inputs.versionSuffix}}"};
+        $suffixMap = @{"push"="alpha.${{github.run_number}}"; "pull_request"="beta.${{github.run_number}}"; "workflow_dispatch"="${{github.event.inputs.versionSuffix}}"};
+        $suffix = $suffixMap['${{github.event_name}}']
+        if( $suffixMap['workflow_dispatch'] -neq '' && '${{github.event_name}}' -eq 'workflow_dispatch'){
+            $suffix = "$($suffix)${{github.run_number}}"
+        }
 
-        echo "::set-output name=versionSuffix::$($suffixMap['${{github.event_name}}'])"
+        echo "::set-output name=versionSuffix::$($suffix)"
 
         if('${{github.event_name}}' -eq 'workflow_dispatch'){
             echo "::set-output name=configuration::${{github.event.inputs.configuration}}"

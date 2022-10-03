@@ -36,7 +36,10 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Setting up parameters"
-        echo "::set-output name=versionSuffix::${{github.event_name}}"
+        $suffixMap = @{"push"="alpha"; "pull_request"="beta"; "workflow_dispatch"=""};
+        $suffix = $suffixMap[${{github.event_name}}]
+
+        echo "::set-output name=versionSuffix::$($suffix)"
 
     - name: printing printing parameters
       shell: pwsh
@@ -58,7 +61,7 @@ jobs:
       removePrereleases: true
       configuration: Release
       verbosity: minimal
-      dotnetVersion: "5.0.x, 6.0.x"      
+      dotnetVersion: [5.0.x, 6.0.x]
     secrets:
       nuget: ${{ secrets.NUGET }}
       

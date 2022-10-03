@@ -95,7 +95,7 @@ jobs:
       if: ${{inputs.publish == 'true'}}
       run: Write-Host "bla"
     - name: escapedsingle2
-      if: ${{ env:cond }}
+      if: ${{ env.cond }}
       run: Write-Host "bla"
       with:
         cond : ${{ inputs.publish }}

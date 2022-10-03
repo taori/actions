@@ -21,9 +21,17 @@ on:
         inputs:  
         
             publish:
-                required: true
                 type: boolean
+                default: true
 
+            publishSymbols:
+                type: boolean
+                default: true
+
+            removePrereleases:
+                type: boolean
+                default: true
+                
             configuration:
                 required: false
                 type: choice
@@ -50,6 +58,8 @@ jobs:
       configuration : ${{ steps.parameters.outputs.configuration }}
       verbosity : ${{ steps.parameters.outputs.verbosity }}
       publish : ${{ steps.parameters.outputs.publish }}
+      publishSymbols : ${{ steps.parameters.outputs.publishSymbols }}
+      removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}
 
     steps:
     - name: Setting up parameters
@@ -57,33 +67,43 @@ jobs:
       shell: pwsh
       run: |
         Write-Host "Setting up parameters"
-        $suffixMap = @{"push"="alpha"; "pull_request"="beta"; "workflow_dispatch"=""};
+
+        $suffixMap = @{"push"="alpha${{github.run_number}}"; "pull_request"="beta${{github.run_number}}"; "workflow_dispatch"=""};
+
+        echo "::set-output name=versionSuffix::$($suffixMap['${{github.event_name}}'])"
 
         if('${{github.event_name}}' -eq 'workflow_dispatch'){
             echo "::set-output name=configuration::${{github.event.inputs.configuration}}"
             echo "::set-output name=verbosity::${{github.event.inputs.verbosity}}"
             echo "::set-output name=publish::${{github.event.inputs.publish}}"
+            echo "::set-output name=publishSymbols::${{github.event.inputs.publishSymbols}}"
+            echo "::set-output name=removePrereleases::${{github.event.inputs.removePrereleases}}"
 
         } else  {
             echo "::set-output name=configuration::Release"
             echo "::set-output name=verbosity::Minimal"
             echo "::set-output name=publish::true"
+            echo "::set-output name=publishSymbols::true"
+            echo "::set-output name=removePrereleases::false"
         }
 
-        echo "::set-output name=versionSuffix::$($suffixMap['${{github.event_name}}'])"
 
     - name: printing printing parameters
       shell: pwsh
       run: |
         Write-Host "versionSuffix: $($env:versionSuffix)"
         Write-Host "publish: $($env:publish)"
+        Write-Host "publishSymbols: $($env:publishSymbols)"
         Write-Host "verbosity: $($env:verbosity)"
         Write-Host "configuration: $($env:configuration)"
+        Write-Host "removePrereleases: $($env:removePrereleases)"
       env:        
         versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}        
         publish : ${{ steps.parameters.outputs.publish }}        
         verbosity : ${{ steps.parameters.outputs.verbosity }}        
         configuration : ${{ steps.parameters.outputs.configuration }}        
+        publishSymbols : ${{ steps.parameters.outputs.publishSymbols }}        
+        removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}        
 
   main:
     needs: parameters
@@ -93,9 +113,9 @@ jobs:
       projectPath: src/composite1/composite1.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
       publish: ${{ needs.parameters.outputs.publish == true }}
-      publishSnupkg: true
+      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == true }}
+      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == true }}
       packageId: demo.composite1
-      removePrereleases: true
       configuration: ${{ needs.parameters.outputs.configuration }}
       verbosity: ${{ needs.parameters.outputs.verbosity }}
       dotnetVersion: 6.0.x

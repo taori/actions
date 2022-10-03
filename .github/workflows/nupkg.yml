@@ -21,7 +21,7 @@ on:
         required: true
         type: boolean
         
-      publishSnupkg:
+      publishSymbols:
         required: true
         type: boolean
         
@@ -56,53 +56,19 @@ on:
   workflow_dispatch:
   
 jobs:
-  # This workflow contains a single job called "build"
-
-  environment : 
-    runs-on: ubuntu-latest
-    
-    outputs:      
-      versionSuffix : ${{ steps.defaults.outputs.versionSuffix }}
-      verbosity : ${{ steps.defaults.outputs.verbosity }}
-
-    steps:
-              
-      - name: declare default values 
-        id: defaults
-        shell: pwsh
-        run: |    
-          $versionSuffix = "";
-          
-          if([string]::IsNullOrEmpty("${{ inputs.versionSuffix }}") -eq $true){
-            $versionSuffix = ""
-          } else {
-            $versionSuffix = "${{ inputs.versionSuffix }}${{github.run_number}}"
-          }
-          
-          $values = @(
-              @("versionSuffix", $true, "$versionSuffix", "$versionSuffix"),
-              @("verbosity", $true, "${{ inputs.verbosity }}", "minimal")
-            )
-            
-          foreach($pair in $values){
-            $value = $pair[2]
-            if($pair[1] -eq $true -And [string]::IsNullOrEmpty("$value") -eq $true){
-                $value = $pair[3]
-            }
-            
-            Write-Host "Assigning $($pair[0]) => $value"
-            echo "::set-output name=$($pair[0])::$value"
-          }
-          
   
   build:
-  
+      
+    concurrency: 
+    group: ${{ github.ref }}
+    cancel-in-progress: true
+
     runs-on: ubuntu-latest    
     needs: environment
     
     env:      
-      versionSuffix : ${{ needs.environment.outputs.versionSuffix }}
-      verbosity : ${{ needs.environment.outputs.verbosity }}
+      versionSuffix : ${{ inputs.versionSuffix }}
+      verbosity : ${{ inputs.verbosity }}
       
       DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
@@ -126,8 +92,8 @@ jobs:
       with:
         dotnet-version: ${{ inputs.dotnetVersion }}
 
-    - name: stop
-      run: exit 1
+   # - name: stop
+   #   run: exit 1
       
     - uses: actions/checkout@v2
     
@@ -140,19 +106,19 @@ jobs:
       run: dotnet test ${{ inputs.solutionPath }} --verbosity $verbosity -c $configuration --no-build 
               
     - name: Pack
-      if: ${{ needs.environment.outputs.publishRelease == 'True' }}
+      if: ${{ inputs.publish == true }}
       run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/${{ inputs.packageId }} --no-build /p:VersionSuffix=$versionSuffix
 
     - name: Remove snupkg
-      if: ${{ inputs.publishSnupkg == 'True' && false }}
+      if: ${{ inputs.publishSymbols == true && false }}
       run: find artifacts/${{ inputs.packageId }}/ -name "*.snupkg" -type f -delete
       
     - name: Release
-      if: ${{ inputs.publish == 'True' && false }}
+      if: ${{ inputs.publish == true && false }}
       run: dotnet nuget push "artifacts/${{ inputs.packageId }}/*.nupkg" -k ${{ secrets.nuget }} -s https://api.nuget.org/v3/index.json
       
     - name: Remove old prereleases 
-      if: ${{ inputs.removePrereleases }}
+      if: ${{ inputs.removePrereleases && false }}
       id: defaults
       shell: pwsh
       run: |  

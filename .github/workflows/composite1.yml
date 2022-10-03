@@ -43,9 +43,9 @@ jobs:
       #if: ${{ github.event_name == "workflow_dispatch" }}
       shell: pwsh
       run: |
-        Write-Host $VERSIONSUFFIX
+        Write-Host $env:versionSuffix
       env:        
-        VERSIONSUFFIX : ${{ steps.parameters.outputs.versionSuffix }}
+        versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
 
     - name: stop
       run: exit 1

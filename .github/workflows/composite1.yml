@@ -76,7 +76,7 @@ jobs:
 
         $suffixMap = @{"push"="alpha.${{github.run_number}}"; "pull_request"="beta.${{github.run_number}}"; "workflow_dispatch"="${{github.event.inputs.versionSuffix}}"};
         $suffix = $suffixMap['${{github.event_name}}']
-        if( $suffixMap['workflow_dispatch'] -ne '' && '${{github.event_name}}' -eq 'workflow_dispatch'){
+        if( $suffixMap['workflow_dispatch'] -ne '' -and '${{github.event_name}}' -ne 'workflow_dispatch'){
             $suffix = "$($suffix)${{github.run_number}}"
         }
 

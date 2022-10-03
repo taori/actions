@@ -52,7 +52,7 @@ jobs:
       run: |
         Write-Host "Setting up parameters"
         $suffixMap = @{"push"="alpha"; "pull_request"="beta"; "workflow_dispatch"=""};
-        $suffix = $suffixMap[${{github.event_name}}]
+        $suffix = $suffixMap['${{github.event_name}}']
 
         echo "::set-output name=versionSuffix::$($suffix)"
 

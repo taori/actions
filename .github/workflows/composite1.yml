@@ -7,6 +7,10 @@ on:
         paths:
           - .github/workflows/*
           - src/composite1/**
+        inputs:
+            publish: true
+            configuration: Release
+            verbosity: minimal
 
     pull_request:    
         branches:
@@ -16,6 +20,10 @@ on:
           - reopened
           - synchronize 
           #- closed
+        inputs:
+            publish: true
+            configuration: Release
+            verbosity: minimal
 
     workflow_dispatch:
         inputs:  
@@ -35,8 +43,11 @@ on:
                 required: false
                 type: choice
                 options:
-                - Debug
-                - Release
+                - quiet
+                - minimal
+                - normal
+                - detailed
+                - diagnostic
 
 jobs:
   parameters:
@@ -53,6 +64,8 @@ jobs:
         Write-Host "Setting up parameters"
         $suffixMap = @{"push"="alpha"; "pull_request"="beta"; "workflow_dispatch"=""};
         $suffix = $suffixMap['${{github.event_name}}']
+        #$inputfallback = @{"push"="alpha"; "pull_request"="beta"; "workflow_dispatch"=""};
+        Write-Host "event verbosity ${{github.event.inputs.verbosity}}"
 
         echo "::set-output name=versionSuffix::$($suffix)"
 

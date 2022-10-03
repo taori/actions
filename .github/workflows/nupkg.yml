@@ -81,9 +81,25 @@ jobs:
       uses: actions/setup-dotnet@v3.0.0
       with:
         dotnet-version: ${{ inputs.dotnetVersion }}
+             
+    - name: JsonPublish
+      if: ${{ fromJSON(inputs.publish) }}
+      run: Write-Host "bla"
+    - name: inputs.publish
+      if: ${{inputs.publish}}
+      run: Write-Host "bla"
+    - name: true
+      if: ${{inputs.publish == true}}
+      run: Write-Host "bla"
+    - name: $true
+      if: ${{inputs.publish == $true}}
+      run: Write-Host "bla"
+    - name: escapedsingle
+      if: ${{inputs.publish == 'true'}}
+      run: Write-Host "bla"
 
-   # - name: stop
-   #   run: exit 1
+    - name: stop
+      run: exit 1
       
     - uses: actions/checkout@v2
     

@@ -24,6 +24,10 @@ on:
         required: true
         type: boolean
         
+      packageId:
+        required: true
+        type: string
+        
       removePrereleases:
         required: false
         type: boolean
@@ -76,13 +80,13 @@ jobs:
           
           $values = @(
               @("versionSuffix", $true, "$versionSuffix", "$versionSuffix"),
-              @("verbosity", $true, "${{ github.event.inputs.verbosity }}", "minimal")
+              @("verbosity", $true, "${{ inputs.verbosity }}", "minimal")
             )
             
           foreach($pair in $values){
             $value = $pair[2]
             if($pair[1] -eq $true -And [string]::IsNullOrEmpty("$value") -eq $true){
-                    $value = $pair[3]
+                $value = $pair[3]
             }
             
             Write-Host "Assigning $($pair[0]) => $value"
@@ -135,24 +139,22 @@ jobs:
               
     - name: Pack
       if: ${{ needs.environment.outputs.publishRelease == 'True' }}
-      run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/nupkg --no-build /p:VersionSuffix=$versionSuffix
+      run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/${{ inputs.packageId }} --no-build /p:VersionSuffix=$versionSuffix
 
     - name: Remove snupkg
       if: ${{ input.publishSnupkg == 'True' && false }}
-      run: find artifacts/nupkg/ -name "*.snupkg" -type f -delete
+      run: find artifacts/${{ inputs.packageId }}/ -name "*.snupkg" -type f -delete
       
     - name: Release
       if: ${{ inputs.publish == 'True' && false }}
-      run: dotnet nuget push "artifacts/nupkg/*.nupkg" -k ${{ secrets.nuget }} -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push "artifacts/${{ inputs.packageId }}/*.nupkg" -k ${{ secrets.nuget }} -s https://api.nuget.org/v3/index.json
       
     - name: Remove old prereleases 
       if: ${{ inputs.removePrereleases }}
       id: defaults
       shell: pwsh
-      env:
-        NUGETKEY: ${{ secrets.NUGET }}
       run: |  
         & dotnet tool install --global NugetUnlister
         $packageVersion = Get-ChildItem -Recurse -Filter '*.nupkg' | select { $_.Name } -ExpandProperty Name -First 1 | Select-String -Pattern "\d[\d\w\.\+-]+(?=.nupkg)" | %{$_.Matches.Value}
-        & nuget-unlist drop prereleasebefore MyPackageId $packageVersion ${{ secrets.nuget }}
+        & nuget-unlist drop prereleasebefore ${{ inputs.packageId }} $packageVersion ${{ secrets.nuget }}
        

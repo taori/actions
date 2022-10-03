@@ -76,7 +76,7 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
 
     steps:
-    - id: Verify Nuget secret exists
+    - name: Verify Nuget secret exists
       env:
         NUGET: ${{ secrets.nuget }}
       if: "${{ env.NUGET == '' }}"

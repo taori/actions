@@ -112,9 +112,9 @@ jobs:
       solutionPath: src/composite1/All.sln
       projectPath: src/composite1/composite1.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
-      publish: ${{ needs.parameters.outputs.publish == true }}
-      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == true }}
-      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == true }}
+      publish: ${{ needs.parameters.outputs.publish == 'true' }}
+      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
+      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
       packageId: demo.composite1
       configuration: ${{ needs.parameters.outputs.configuration }}
       verbosity: ${{ needs.parameters.outputs.verbosity }}

@@ -1,1 +1,66 @@
+name: main
 
+on: 
+    push:
+        branches:
+          - main
+        paths:
+          - .github/workflows/*
+          - src/composite1/**
+
+    pull_request:    
+        branches:
+          - main
+        paths:
+          - src/composite1/**
+        types: 
+          - opened
+          - reopened
+          - synchronize 
+          #- closed
+
+    workflow_dispatch:  
+
+jobs:
+  parameters:
+  
+    outputs:      
+      versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
+
+    steps:
+    - name: Setting up environment
+      id: parameters
+      #if: ${{ github.event_name == "workflow_dispatch" }}
+      shell: pwsh
+      run: |
+        Write-Host "Setting variables"
+        echo "::set-output name=$(versionSuffix)::${{ github.event_name }}"
+
+    - name: printing environment
+      #if: ${{ github.event_name == "workflow_dispatch" }}
+      shell: pwsh
+      run: |
+        Write-Host "$versionSuffix"
+      env:        
+        versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
+
+    - name: stop
+      run: exit 1
+
+  main:
+    needs: parameters
+    uses: taori/actions/.github/workflows/nupkg.yml@main
+    with:
+      solutionPath: src/composite1/All.sln
+      projectPath: src/composite1/composite1.csproj
+      versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
+      publish: true        
+      publishSnupkg: true
+      packageId: demo.composite1
+      removePrereleases: true
+      configuration: Release
+      verbosity: minimal
+      dotnetVersion: "5.0.x, 6.0.x"      
+    secrets:
+      nuget: ${{ secrets.NUGET }}
+      

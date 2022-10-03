@@ -120,15 +120,16 @@ jobs:
       shell: pwsh
       run: Write-Host "publishing"
         
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3.0.0
+      with:
+        dotnet-version: ${{ inputs.dotnetVersion }}
+
     - name: stop
       run: exit 1
       
     - uses: actions/checkout@v2
     
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3.0.0
-      with:
-        dotnet-version: ${{ inputs.dotnetVersion }}
 
     - name: Restore dependencies
       run: dotnet restore ${{ inputs.solutionPath }}

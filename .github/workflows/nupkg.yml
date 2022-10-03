@@ -87,15 +87,19 @@ jobs:
       run: Write-Host "${{inputs.publish}}"
 
     - name: JsonPublish
+      shell: pwsh
       if: ${{ fromJSON(inputs.publish) }}
       run: Write-Host "bla"
     - name: inputs.publish
+      shell: pwsh
       if: ${{inputs.publish}}
       run: Write-Host "bla"
     - name: true
+      shell: pwsh
       if: ${{inputs.publish == true}}
       run: Write-Host "bla"
     - name: escapedsingle
+      shell: pwsh
       if: ${{inputs.publish == 'true'}}
       run: Write-Host "bla"
 

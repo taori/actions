@@ -19,9 +19,9 @@ on:
 
     workflow_dispatch:
         inputs:        
-        publish:
-        required: true
-        type: boolean
+            publish:
+            required: true
+            type: boolean
 
 jobs:
   parameters:
@@ -61,7 +61,7 @@ jobs:
       removePrereleases: true
       configuration: Release
       verbosity: minimal
-      dotnetVersion: [5.0.x, 6.0.x]
+      dotnetVersion: 5.0.x, 6.0.x
     secrets:
       nuget: ${{ secrets.NUGET }}
       

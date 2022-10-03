@@ -68,6 +68,7 @@ jobs:
     env:      
       versionSuffix : ${{ inputs.versionSuffix }}
       verbosity : ${{ inputs.verbosity }}
+      configuration : ${{ inputs.configuration }}
       
       DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true

@@ -1,4 +1,4 @@
-name: Create nuget package
+name: Nuget
 
 on:
   workflow_call:

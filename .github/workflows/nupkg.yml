@@ -77,16 +77,6 @@ jobs:
 
     steps:
         
-    - name: test variable publish
-      if: ${{ inputs.publish }}
-      shell: pwsh
-      run: Write-Host "publishing"
-      
-    - name: test variable publish and false
-      if: ${{ inputs.publish && false }}
-      shell: pwsh
-      run: Write-Host "publishing"
-        
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3.0.0
       with:
@@ -106,7 +96,7 @@ jobs:
       run: dotnet test ${{ inputs.solutionPath }} --verbosity $verbosity -c $configuration --no-build 
               
     - name: Pack
-      if: ${{ inputs.publish == true }}
+      if: ${{ inputs.publish }}
       run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/${{ inputs.packageId }} --no-build /p:VersionSuffix=$versionSuffix
 
     - name: Remove snupkg

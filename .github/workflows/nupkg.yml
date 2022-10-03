@@ -13,8 +13,9 @@ on:
         type: string
         
       versionSuffix:
-        required: true
+        required: false
         type: string
+        default: ""
         
       publish:
         required: true

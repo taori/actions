@@ -58,7 +58,6 @@ jobs:
       run: |
         Write-Host "Setting up parameters"
         $suffixMap = @{"push"="alpha"; "pull_request"="beta"; "workflow_dispatch"=""};
-        #$suffix = $suffixMap['${{github.event_name}}']
 
         if('${{github.event_name}}' -eq 'workflow_dispatch'){
             echo "::set-output name=configuration::${{github.event.inputs.configuration}}"
@@ -93,13 +92,13 @@ jobs:
       solutionPath: src/composite1/All.sln
       projectPath: src/composite1/composite1.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
-      publish: true        
+      publish: ${{ needs.parameters.outputs.publish }}
       publishSnupkg: true
       packageId: demo.composite1
       removePrereleases: true
-      configuration: Release
-      verbosity: minimal
-      dotnetVersion: 5.0.x, 6.0.x
+      configuration: ${{ needs.parameters.outputs.configuration }}
+      verbosity: ${{ needs.parameters.outputs.verbosity }}
+      dotnetVersion: 6.0.x
     secrets:
       nuget: ${{ secrets.NUGET }}
       

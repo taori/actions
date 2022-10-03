@@ -94,42 +94,29 @@ jobs:
         if( $suffixMap['workflow_dispatch'] -ne '' -and '${{github.event_name}}' -eq 'workflow_dispatch'){
             $suffix = $($suffix.TrimEnd('.') + ".")
             $suffix = "$($suffix)${{github.run_number}}"
-        }
+        }  
 
-        echo "::set-output name=versionSuffix::$($suffix)"
+        #   key name                workflow value                                  fallback value
+        $values = @(
+            @("versionSuffix",      "$suffix",                                      "$suffix"),
+            @("configuration",      "${{github.event.inputs.configuration}}",       "Release"),
+            @("verbosity",          "${{github.event.inputs.verbosity}}",           "minimal"),
+            @("publish",            "${{github.event.inputs.publish}}",             "false"),
+            @("publishSymbols",     "${{github.event.inputs.publishSymbols}}",      "false"),
+            @("removePrereleases",  "${{github.event.inputs.removePrereleases}}",   "false")
+        )
+            
+        $manual = $('${{github.event_name}}' -eq 'workflow_dispatch')
 
-        if('${{github.event_name}}' -eq 'workflow_dispatch'){
-            echo "::set-output name=configuration::${{github.event.inputs.configuration}}"
-            echo "::set-output name=verbosity::${{github.event.inputs.verbosity}}"
-            echo "::set-output name=publish::${{github.event.inputs.publish}}"
-            echo "::set-output name=publishSymbols::${{github.event.inputs.publishSymbols}}"
-            echo "::set-output name=removePrereleases::${{github.event.inputs.removePrereleases}}"
-
-        } else  {
-            echo "::set-output name=configuration::Release"
-            echo "::set-output name=verbosity::Minimal"
-            echo "::set-output name=publish::true"
-            echo "::set-output name=publishSymbols::true"
-            echo "::set-output name=removePrereleases::false"
-        }
-
-
-    - name: printing printing parameters
-      shell: pwsh
-      run: |
-        Write-Host "versionSuffix: $($env:versionSuffix)"
-        Write-Host "publish: $($env:publish)"
-        Write-Host "publishSymbols: $($env:publishSymbols)"
-        Write-Host "verbosity: $($env:verbosity)"
-        Write-Host "configuration: $($env:configuration)"
-        Write-Host "removePrereleases: $($env:removePrereleases)"
-      env:        
-        versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}        
-        publish : ${{ steps.parameters.outputs.publish }}        
-        verbosity : ${{ steps.parameters.outputs.verbosity }}        
-        configuration : ${{ steps.parameters.outputs.configuration }}        
-        publishSymbols : ${{ steps.parameters.outputs.publishSymbols }}        
-        removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}        
+        foreach($pair in $values){
+            $value = $pair[2]
+            if($manual -eq $true){
+                $value = $pair[1]
+            }
+            
+            Write-Host "Setting parameter $($pair[0]) => $value"
+            echo "::set-output name=$($pair[0])::$value"
+        }    
 
   package:
     needs: parameters

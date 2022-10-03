@@ -23,8 +23,8 @@ on:
     workflow_dispatch:  
 
 jobs:
-  runs-on: ubuntu-latest
   parameters:
+    runs-on: ubuntu-latest
   
     outputs:      
       versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
@@ -50,6 +50,7 @@ jobs:
       run: exit 1
 
   main:
+    runs-on: ubuntu-latest
     needs: parameters
     uses: taori/actions/.github/workflows/nupkg.yml@main
     with:

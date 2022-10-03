@@ -15,7 +15,6 @@ on:
           - opened
           - reopened
           - synchronize 
-          #- closed
 
     workflow_dispatch:
         inputs:  
@@ -34,6 +33,7 @@ on:
                 
             configuration:
                 required: false
+                default: Release
                 type: choice
                 options:
                 - Debug
@@ -41,6 +41,7 @@ on:
 
             verbosity:
                 required: false
+                default: minimal
                 type: choice
                 options:
                 - quiet
@@ -68,7 +69,7 @@ jobs:
       run: |
         Write-Host "Setting up parameters"
 
-        $suffixMap = @{"push"="alpha${{github.run_number}}"; "pull_request"="beta${{github.run_number}}"; "workflow_dispatch"=""};
+        $suffixMap = @{"push"="alpha${{github.run_number}}"; "pull_request"="beta${{github.run_number}}"; "workflow_dispatch"="${{github.event.inputs.versionSuffix}}"};
 
         echo "::set-output name=versionSuffix::$($suffixMap['${{github.event_name}}'])"
 

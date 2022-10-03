@@ -96,19 +96,19 @@ jobs:
       run: dotnet test ${{ inputs.solutionPath }} --verbosity $verbosity -c $configuration --no-build 
               
     - name: Pack
-      if: ${{ inputs.publish }}
+      if: ${{ fromJSON(inputs.publish) }}
       run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/${{ inputs.packageId }} --no-build /p:VersionSuffix=$versionSuffix
 
     - name: Remove snupkg
-      if: ${{ inputs.publishSymbols == true && false }}
+      if: ${{ fromJSON(inputs.publishSymbols) && false }}
       run: find artifacts/${{ inputs.packageId }}/ -name "*.snupkg" -type f -delete
       
     - name: Release
-      if: ${{ inputs.publish == true && false }}
+      if: ${{ fromJSON(inputs.publish) && false }}
       run: dotnet nuget push "artifacts/${{ inputs.packageId }}/*.nupkg" -k ${{ secrets.nuget }} -s https://api.nuget.org/v3/index.json
       
     - name: Remove old prereleases 
-      if: ${{ inputs.removePrereleases && false }}
+      if: ${{ fromJSON(inputs.removePrereleases) && false }}
       id: defaults
       shell: pwsh
       run: |  

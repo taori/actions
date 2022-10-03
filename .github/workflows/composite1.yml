@@ -19,6 +19,11 @@ on:
     workflow_dispatch:
         inputs:  
         
+            versionSuffix:
+                type: string
+                description: Version suffix for package
+                default: ""
+        
             publish:
                 type: boolean
                 default: true

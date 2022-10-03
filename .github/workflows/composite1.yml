@@ -56,6 +56,7 @@ on:
                 - diagnostic
 
 jobs:
+
   parameters:
     runs-on: ubuntu-latest
   
@@ -68,13 +69,27 @@ jobs:
       removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}
 
     steps:
+
+    - name: nuget secret verification
+      env:
+        NUGET: ${{ secrets.NUGET }}
+      if: "${{ env.NUGET == '' }}"
+      uses: actions/github-script@v3
+      with:
+        script: |
+            core.setFailed('"nuget" secret is missing')
+
     - name: Setting up parameters
       id: parameters
       shell: pwsh
       run: |
         Write-Host "Setting up parameters"
 
-        $suffixMap = @{"push"="alpha.${{github.run_number}}"; "pull_request"="beta.${{github.run_number}}"; "workflow_dispatch"="${{github.event.inputs.versionSuffix}}"};
+        $suffixMap = @{
+            "push"="alpha.${{github.run_number}}"; 
+            "pull_request"="beta.${{github.run_number}}"; 
+            "workflow_dispatch"="${{github.event.inputs.versionSuffix}}"
+        };
         $suffix = $suffixMap['${{github.event_name}}']
         if( $suffixMap['workflow_dispatch'] -ne '' -and '${{github.event_name}}' -eq 'workflow_dispatch'){
             $suffix = $($suffix.TrimEnd('.') + ".")

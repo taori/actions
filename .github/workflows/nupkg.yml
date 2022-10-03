@@ -83,6 +83,7 @@ jobs:
         dotnet-version: ${{ inputs.dotnetVersion }}
              
     - name: Publish value
+      shell: pwsh
       run: Write-Host "${{inputs.publish}}"
 
     - name: JsonPublish

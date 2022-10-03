@@ -60,7 +60,7 @@ jobs:
         $suffixMap = @{"push"="alpha"; "pull_request"="beta"; "workflow_dispatch"=""};
         #$suffix = $suffixMap['${{github.event_name}}']
 
-        if(${{github.event_name}} -eq 'workflow_dispatch'){
+        if('${{github.event_name}}' -eq 'workflow_dispatch'){
             echo "::set-output name=configuration::${{github.event.inputs.configuration}}"
             echo "::set-output name=verbosity::${{github.event.inputs.verbosity}}"
             echo "::set-output name=publish::${{github.event.inputs.publish}}"

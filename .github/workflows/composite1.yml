@@ -18,7 +18,7 @@ on:
           #- closed
 
     workflow_dispatch:
-      inputs:        
+        inputs:        
         publish:
         required: true
         type: boolean

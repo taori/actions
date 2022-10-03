@@ -11,6 +11,7 @@ on:
             publish: true
             configuration: Release
             verbosity: minimal
+            
 
     pull_request:    
         branches:

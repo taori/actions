@@ -8,7 +8,7 @@ on:
         required: true
         type: string
         
-      projectPath:
+      projectPaths:
         required: true
         type: string
         
@@ -22,6 +22,10 @@ on:
         type: string
         default: ""
         
+      packageIds:
+        required: true
+        type: string
+        
       publish:
         required: true
         type: boolean
@@ -33,10 +37,6 @@ on:
       publishSymbols:
         required: true
         type: boolean
-        
-      packageId:
-        required: true
-        type: string
         
       removePrereleases:
         required: false
@@ -57,11 +57,6 @@ on:
         required: false
         type: string
         default: "5.0.x, 6.0.x"
-        
-      skipSolutionBuild:
-        required: false
-        type: boolean
-        default: false
         
     secrets:
       nuget:
@@ -119,49 +114,28 @@ jobs:
     - name: Test
       if: ${{ !inputs.skipSolutionBuild }}
       run: dotnet test ${{ inputs.solutionPath }} --verbosity $verbosity -c $configuration --no-build 
-      
-      
-  package:
-        
-    concurrency:    
-      group: ${{ github.ref }}.${{inputs.packageId }}
-      cancel-in-progress: true
-
-    runs-on: ubuntu-latest
-    
-    env:      
-      versionSuffix : ${{ inputs.versionSuffix }}
-      verbosity : ${{ inputs.verbosity }}
-      configuration : ${{ inputs.configuration }}
-      
-      DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
-      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-      DOTNET_NOLOGO: true
-      DOTNET_CLI_TELEMETRY_OPTOUT: true
-
-    steps:
-    - name: nuget secret verification
-      env:
-        NUGET: ${{ secrets.nuget }}
-      if: "${{ env.NUGET == '' }}"
-      uses: actions/github-script@v3
-      with:
-        script: |
-            core.setFailed('"nuget" secret is missing')
-        
               
     - name: Pack with csproj version
       shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix == '' }}
-      run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/nupkg --no-build /p:VersionSuffix=$versionSuffix
+      run: |
+        $projects = "${{ inputs.projectPaths }}".Split(";")
+        foreach($project in $projects){
+          dotnet pack $project --verbosity $verbosity -c $configuration -o artifacts/nupkg --no-build /p:VersionSuffix=$versionSuffix
+        }        
               
     - name: Pack manual version
+      shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix != '' }}
-      run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/nupkg --no-build /p:VersionSuffix=$versionSuffix /p:VersionPrefix=${{ inputs.versionPrefix }}
+      run: |
+        $projects = "${{ inputs.projectPaths }}".Split(";")
+        foreach($project in $projects){
+          dotnet pack $project --verbosity $verbosity -c $configuration -o artifacts/nupkg --no-build /p:VersionSuffix=$versionSuffix /p:VersionPrefix=${{ inputs.versionPrefix }}
+        }   
 
     - name: Remove snupkg
       if: ${{ !inputs.publishSymbols && inputs.publish }}
-      run: find artifacts/${{ inputs.packageId }}/ -name "*.snupkg" -type f -delete
+      run: find artifacts/nupkg/ -name "*.snupkg" -type f -delete
       
     - name: Release
       if: ${{ inputs.publish }}
@@ -173,6 +147,6 @@ jobs:
       shell: pwsh
       run: |  
         & dotnet tool install --global NugetUnlister
-        $packageVersion = Get-ChildItem -Recurse -Filter '*.nupkg' | select { $_.Name } -ExpandProperty Name -First 1 | Select-String -Pattern "\d[\d\w\.\+-]+(?=.nupkg)" | %{$_.Matches.Value}
+        $packageVersion = Get-ChildItem -Recurse -Filter '*.nupkg' | select { $_.Name } -ExpandProperty Name | Select-String -Pattern "\d[\d\w\.\+-]+(?=.nupkg)" | %{$_.Matches.Value}
         & nuget-unlist drop prereleasebefore ${{ inputs.packageId }} $packageVersion ${{ secrets.nuget }}
        

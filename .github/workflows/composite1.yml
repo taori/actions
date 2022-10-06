@@ -24,17 +24,26 @@ on:
                 description: Version suffix for package
                 default: ""
         
-            publish:
+            versionPrefix:
+                type: string
+                description: Prefix version such as 0.0.1
+                default: ""
+        
+            package:
                 type: boolean
                 default: true
+        
+            publish:
+                type: boolean
+                default: false
 
             publishSymbols:
                 type: boolean
-                default: true
+                default: false
 
             removePrereleases:
                 type: boolean
-                default: true
+                default: false
                 
             configuration:
                 required: false
@@ -65,6 +74,7 @@ jobs:
       configuration : ${{ steps.parameters.outputs.configuration }}
       verbosity : ${{ steps.parameters.outputs.verbosity }}
       publish : ${{ steps.parameters.outputs.publish }}
+      package : ${{ steps.parameters.outputs.package }}
       publishSymbols : ${{ steps.parameters.outputs.publishSymbols }}
       removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}
 
@@ -102,6 +112,7 @@ jobs:
             @("configuration",      "${{github.event.inputs.configuration}}",       "Release"),
             @("verbosity",          "${{github.event.inputs.verbosity}}",           "minimal"),
             @("publish",            "${{github.event.inputs.publish}}",             "false"),
+            @("package",            "${{github.event.inputs.package}}",             "true"),
             @("publishSymbols",     "${{github.event.inputs.publishSymbols}}",      "false"),
             @("removePrereleases",  "${{github.event.inputs.removePrereleases}}",   "false")
         )
@@ -125,6 +136,8 @@ jobs:
       solutionPath: src/composite1/All.sln
       projectPath: src/composite1/composite1.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
+      versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
+      package: ${{ needs.parameters.outputs.package == 'true' }}
       publish: ${{ needs.parameters.outputs.publish == 'true' }}
       publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
       removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}

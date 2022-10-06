@@ -119,14 +119,45 @@ jobs:
     - name: Test
       if: ${{ !inputs.skipSolutionBuild }}
       run: dotnet test ${{ inputs.solutionPath }} --verbosity $verbosity -c $configuration --no-build 
+      
+      
+  package:
+        
+    concurrency:    
+      group: ${{ github.ref }}.${{inputs.packageId }}
+      cancel-in-progress: true
+
+    runs-on: ubuntu-latest
+    
+    env:      
+      versionSuffix : ${{ inputs.versionSuffix }}
+      verbosity : ${{ inputs.verbosity }}
+      configuration : ${{ inputs.configuration }}
+      
+      DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    steps:
+    - name: nuget secret verification
+      env:
+        NUGET: ${{ secrets.nuget }}
+      if: "${{ env.NUGET == '' }}"
+      uses: actions/github-script@v3
+      with:
+        script: |
+            core.setFailed('"nuget" secret is missing')
+        
               
     - name: Pack with csproj version
+      shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix == '' }}
-      run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/${{ inputs.packageId }} --no-build /p:VersionSuffix=$versionSuffix
+      run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/nupkg --no-build /p:VersionSuffix=$versionSuffix
               
     - name: Pack manual version
       if: ${{ inputs.package && inputs.versionPrefix != '' }}
-      run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/${{ inputs.packageId }} --no-build /p:VersionSuffix=$versionSuffix /p:VersionPrefix=${{ inputs.versionPrefix }}
+      run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/nupkg --no-build /p:VersionSuffix=$versionSuffix /p:VersionPrefix=${{ inputs.versionPrefix }}
 
     - name: Remove snupkg
       if: ${{ !inputs.publishSymbols && inputs.publish }}
@@ -134,7 +165,7 @@ jobs:
       
     - name: Release
       if: ${{ inputs.publish }}
-      run: dotnet nuget push "artifacts/${{ inputs.packageId }}/*.nupkg" -k ${{ secrets.nuget }} -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push "artifacts/nupkg/*.nupkg" -k ${{ secrets.nuget }} -s https://api.nuget.org/v3/index.json
       
     - name: Remove old prereleases 
       if: ${{ inputs.removePrereleases }}

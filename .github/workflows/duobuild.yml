@@ -134,7 +134,7 @@ jobs:
   package1:    
     
       needs: parameters
-      uses: taori/actions/.github/workflows/nupkg.yml@nupkgv3
+      uses: taori/actions/.github/workflows/nupkg.yml@v3
       with:
         solutionPath: src/composite1/All.sln
         projectPath: src/composite1/composite1.csproj
@@ -154,7 +154,7 @@ jobs:
   package2:   
   
       needs: parameters
-      uses: taori/actions/.github/workflows/nupkg.yml@nupkgv3
+      uses: taori/actions/.github/workflows/nupkg.yml@v3
       with:
         skipSolutionBuild: true
         solutionPath: src/composite1/All.sln

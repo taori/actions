@@ -71,6 +71,7 @@ jobs:
   
     outputs:      
       versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
+      versionPrefix : ${{ steps.parameters.outputs.versionPrefix }}
       configuration : ${{ steps.parameters.outputs.configuration }}
       verbosity : ${{ steps.parameters.outputs.verbosity }}
       publish : ${{ steps.parameters.outputs.publish }}

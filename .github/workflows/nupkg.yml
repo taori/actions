@@ -61,7 +61,7 @@ on:
       skipSolutionBuild:
         required: false
         type: boolean
-        default: true
+        default: false
         
     secrets:
       nuget:

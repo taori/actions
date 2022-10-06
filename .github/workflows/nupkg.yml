@@ -17,7 +17,16 @@ on:
         type: string
         default: ""
         
+      versionPrefix:
+        required: false
+        type: string
+        default: ""
+        
       publish:
+        required: true
+        type: boolean
+        
+      package:
         required: true
         type: boolean
         
@@ -48,6 +57,11 @@ on:
         required: false
         type: string
         default: "5.0.x, 6.0.x"
+        
+      skipSolutionBuild:
+        required: false
+        type: boolean
+        default: true
         
     secrets:
       nuget:
@@ -93,18 +107,28 @@ jobs:
     #- name: stop
     #  run: exit 1
       
-    - uses: actions/checkout@v2   
+    - uses: actions/checkout@v2 
+      if: ${{ !inputs.skipSolutionBuild }}
 
     - name: Restore dependencies
+      if: ${{ !inputs.skipSolutionBuild }}
       run: dotnet restore ${{ inputs.solutionPath }}
+      
     - name: Build
+      if: ${{ !inputs.skipSolutionBuild }}
       run: dotnet build ${{ inputs.solutionPath }} --verbosity $verbosity -c $configuration --no-restore 
+      
     - name: Test
+      if: ${{ !inputs.skipSolutionBuild }}
       run: dotnet test ${{ inputs.solutionPath }} --verbosity $verbosity -c $configuration --no-build 
               
-    - name: Pack
-      if: ${{ inputs.publish }}
+    - name: Pack with csproj version
+      if: ${{ inputs.package && inputs.versionPrefix == '' }}
       run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/${{ inputs.packageId }} --no-build /p:VersionSuffix=$versionSuffix
+              
+    - name: Pack manual version
+      if: ${{ inputs.package && inputs.versionPrefix != '' }}
+      run: dotnet pack ${{ inputs.projectPath }} --verbosity $verbosity -c $configuration -o artifacts/${{ inputs.packageId }} --no-build /p:VersionSuffix=$versionSuffix /p:VersionPrefix=${{ inputs.versionPrefix }}
 
     - name: Remove snupkg
       if: ${{ !inputs.publishSymbols && inputs.publish }}

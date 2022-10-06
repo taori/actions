@@ -131,11 +131,9 @@ jobs:
             echo "::set-output name=$($pair[0])::$value"
         }    
 
-  package:
-    steps:
+  package1:    
     
-    
-    - needs: parameters
+      needs: parameters
       uses: taori/actions/.github/workflows/nupkg.yml@nupkgv3
       with:
         solutionPath: src/composite1/All.sln
@@ -153,7 +151,9 @@ jobs:
       secrets:
         nuget: ${{ secrets.NUGET }}
     
-    - needs: parameters
+  package2:   
+  
+      needs: parameters
       uses: taori/actions/.github/workflows/nupkg.yml@nupkgv3
       with:
         skipSolutionBuild: true

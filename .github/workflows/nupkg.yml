@@ -68,11 +68,7 @@ jobs:
 
     runs-on: ubuntu-latest
     
-    env:      
-      versionSuffix : ${{ inputs.versionSuffix }}
-      verbosity : ${{ inputs.verbosity }}
-      configuration : ${{ inputs.configuration }}
-      
+    env:            
       DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       DOTNET_NOLOGO: true
@@ -105,11 +101,11 @@ jobs:
       
     - name: Build
       if: ${{ !inputs.skipSolutionBuild }}
-      run: dotnet build ${{ inputs.solutionPath }} --verbosity $verbosity -c $configuration --no-restore 
+      run: dotnet build ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-restore 
       
     - name: Test
       if: ${{ !inputs.skipSolutionBuild }}
-      run: dotnet test ${{ inputs.solutionPath }} --verbosity $verbosity -c $configuration --no-build 
+      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build 
               
     - name: Pack with csproj version
       shell: pwsh
@@ -117,7 +113,7 @@ jobs:
       run: |
         $projects = "${{ inputs.projectPaths }}".Split(";")
         foreach($project in $projects){
-          dotnet pack $project --verbosity $verbosity -c $configuration -o artifacts/nupkg --no-build /p:VersionSuffix=$versionSuffix
+          dotnet pack $project --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} -o artifacts/nupkg --no-build /p:VersionSuffix=${{ inputs.versionSuffix }}
         }        
               
     - name: Pack manual version
@@ -126,7 +122,7 @@ jobs:
       run: |
         $projects = "${{ inputs.projectPaths }}".Split(";")
         foreach($project in $projects){
-          dotnet pack $project --verbosity $verbosity -c $configuration -o artifacts/nupkg --no-build /p:VersionSuffix=$versionSuffix /p:VersionPrefix=${{ inputs.versionPrefix }}
+          dotnet pack $project --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} -o artifacts/nupkg --no-build /p:VersionSuffix=${{ inputs.versionSuffix }} /p:VersionPrefix=${{ inputs.versionPrefix }}
         }   
 
     - name: Remove snupkg

@@ -66,8 +66,6 @@ on:
     secrets:
       nuget:
         required: true
-        
-  workflow_dispatch:
   
 jobs:
   

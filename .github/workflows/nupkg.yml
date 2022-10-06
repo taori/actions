@@ -22,10 +22,6 @@ on:
         type: string
         default: ""
         
-      packageIds:
-        required: true
-        type: string
-        
       publish:
         required: true
         type: boolean

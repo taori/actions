@@ -72,7 +72,7 @@ jobs:
   build:
       
     concurrency:    
-      group: ${{ github.ref + inputs.packageId }}
+      group: ${{ github.ref }}.${{inputs.packageId }}
       cancel-in-progress: true
 
     runs-on: ubuntu-latest

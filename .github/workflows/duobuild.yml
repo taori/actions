@@ -130,44 +130,23 @@ jobs:
             echo "::set-output name=$($pair[0])::$value"
         }    
 
-  package1:    
+  package:    
     
       needs: parameters
-      uses: taori/actions/.github/workflows/nupkg.yml@v4
-      with:
-        solutionPath: src/composite1/All.sln
-        projectPath: src/composite1/composite1.csproj
-        versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
-        versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
-        package: ${{ needs.parameters.outputs.package == 'true' }}
-        publish: ${{ needs.parameters.outputs.publish == 'true' }}
-        publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
-        removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
-        packageId: demo.composite1
-        configuration: ${{ needs.parameters.outputs.configuration }}
-        verbosity: ${{ needs.parameters.outputs.verbosity }}
-        dotnetVersion: 6.0.x
-      secrets:
-        nuget: ${{ secrets.NUGET }}
-    
-  package2:   
-  
-      needs: [parameters, package1]
       uses: taori/actions/.github/workflows/nupkg.yml@main
       with:
-        skipSolutionBuild: true
         solutionPath: src/composite1/All.sln
-        projectPath: src/composite1/composite1.csproj
+        projectPaths: src/composite1/composite1.csproj;src/composite2/composite2.csproj
         versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
         versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
         package: ${{ needs.parameters.outputs.package == 'true' }}
         publish: ${{ needs.parameters.outputs.publish == 'true' }}
         publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
         removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
-        packageId: demo.composite2
         configuration: ${{ needs.parameters.outputs.configuration }}
         verbosity: ${{ needs.parameters.outputs.verbosity }}
         dotnetVersion: 6.0.x
       secrets:
         nuget: ${{ secrets.NUGET }}
+  
       

@@ -144,10 +144,7 @@ jobs:
          Select-String -Pattern "(?<packageId>[^\d]+)\.(?<version>[\w\d\.-]+)(?=.nupkg)" |
          %{ @($_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value) } 
          
-         foreach ($package in $packages){
+        foreach ($package in $packages){
           & nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}
-         }
-        
-        $packageVersion = Get-ChildItem -Recurse -Filter '*.nupkg' | select { $_.Name } -ExpandProperty Name | Select-String -Pattern "\d[\d\w\.\+-]+(?=.nupkg)" | %{$_.Matches.Value}
-        & nuget-unlist drop prereleasebefore ${{ inputs.packageId }} $packageVersion ${{ secrets.nuget }}
+        }
        

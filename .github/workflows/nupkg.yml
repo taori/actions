@@ -146,6 +146,6 @@ jobs:
          
         foreach ($package in $packages){
           Write-Host "nuget-unlist drop prereleasebefore $($package[0]) $($package[1]) ${{ secrets.nuget }}"
-          & nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}
+          nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}
         }
        

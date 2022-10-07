@@ -148,6 +148,7 @@ jobs:
             $match = [System.Text.RegularExpressions.Regex]::Match($package, "(?<packageId>[^\d]+)\.(?<version>[\w\d\.-]+)(?=.nupkg)")
             $packgeId = $match.Groups["packageId"].Value
             $version = $match.Groups["version"].Value
+            Write-Host "nuget-unlist drop prereleasebefore $packgeId $version ${{ secrets.nuget }}"
             nuget-unlist drop prereleasebefore $packgeId $version ${{ secrets.nuget }}
         }
        

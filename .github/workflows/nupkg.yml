@@ -141,11 +141,13 @@ jobs:
         & dotnet tool install --global NugetUnlister
         $packages = Get-ChildItem "artifacts/nupkg/" -Filter "*.nupkg" |
          %{ $_.Name } |
-         Select-String -Pattern "(?<packageId>[^\d]+)\.(?<version>[\w\d\.-]+)(?=.nupkg)" |
-         %{ @($_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value) } 
-         
+         #Select-String -Pattern "(?<packageId>[^\d]+)\.(?<version>[\w\d\.-]+)(?=.nupkg)" |
+         #%{ @($_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value) } 
+            
         foreach ($package in $packages){
-          Write-Host "nuget-unlist drop prereleasebefore $($package[0]) $($package[1]) ${{ secrets.nuget }}"
-          nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}
+            $match = [System.Text.RegularExpressions.Regex]::Match($package, "(?<packageId>[^\d]+)\.(?<version>[\w\d\.-]+)(?=.nupkg)")
+            $packgeId = $match.Groups["packageId"].Value
+            $version = $match.Groups["version"].Value
+            nuget-unlist drop prereleasebefore $packgeId $version ${{ secrets.nuget }}
         }
        

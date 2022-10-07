@@ -140,7 +140,7 @@ jobs:
       run: |  
         & dotnet tool install --global NugetUnlister
         $packages = Get-ChildItem "artifacts/nupkg/" -Filter "*.nupkg" |
-         %{ $_.Name } |
+         %{ $_.Name } 
          #Select-String -Pattern "(?<packageId>[^\d]+)\.(?<version>[\w\d\.-]+)(?=.nupkg)" |
          #%{ @($_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value) } 
             

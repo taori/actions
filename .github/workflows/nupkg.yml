@@ -98,7 +98,7 @@ jobs:
 
     - name: Restore dependencies
       if: ${{ !inputs.skipSolutionBuild }}
-      run: dotnet restore ${{ inputs.solutionPath }}
+      run: dotnet restore ${{ inputs.solutionPath }} --ignore-failed-sources
       
     - name: Build
       if: ${{ !inputs.skipSolutionBuild }}

@@ -93,7 +93,7 @@ jobs:
     #- name: stop
     #  run: exit 1
       
-    - uses: actions/checkout@v2 
+    - uses: actions/checkout@v3.1.0
       if: ${{ !inputs.skipSolutionBuild }}
 
     - name: Restore dependencies

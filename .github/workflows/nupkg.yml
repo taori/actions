@@ -3,12 +3,13 @@ name: Nuget
 on:
   workflow_call:
     inputs:  
-        
-      solutionPath:
-        required: true
+      
+      packProjects:
         type: string
-        
-      projectPaths:
+        required: true
+        description: 'expects a syntax like: "Path1;Path2"'
+      
+      solutionPath:
         required: true
         type: string
         
@@ -38,11 +39,6 @@ on:
         required: true
         type: boolean
         default: true
-      
-      skipSolutionBuild:
-        required: false
-        type: boolean
-        default: false
       
       removePrereleases:
         required: false
@@ -119,23 +115,19 @@ jobs:
       uses: actions/setup-dotnet@v3.0.0
       with:
         dotnet-version: ${{ inputs.dotnetVersion }}
-             
+        
     #- name: stop
     #  run: exit 1
       
     - uses: actions/checkout@v3.1.0
-      if: ${{ !inputs.skipSolutionBuild }}
 
     - name: Restore dependencies
-      if: ${{ !inputs.skipSolutionBuild }}
       run: dotnet restore ${{ inputs.solutionPath }} --ignore-failed-sources
       
     - name: Build
-      if: ${{ !inputs.skipSolutionBuild }}
       run: dotnet build ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-restore 
       
     - name: Test
-      if: ${{ !inputs.skipSolutionBuild }}
       run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage
              
     - name: Code Coverage Report
@@ -158,12 +150,15 @@ jobs:
       with:
         recreate: true
         path: code-coverage-results.md
-        
+      
+    - name: Write to Job Summary
+      run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+      
     - name: Pack with csproj version
       shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix == '' }}
       run: |
-        $projects = "${{ inputs.projectPaths }}".Split(";")
+        $projects = "${{ inputs.packProjects }}".Split(";")
         foreach($project in $projects){
           dotnet pack $project --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} -o artifacts/nupkg --no-build /p:VersionSuffix=${{ inputs.versionSuffix }}
         }        
@@ -172,7 +167,7 @@ jobs:
       shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix != '' }}
       run: |
-        $projects = "${{ inputs.projectPaths }}".Split(";")
+        $projects = "${{ inputs.packProjects }}".Split(";")
         foreach($project in $projects){
           dotnet pack $project --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} -o artifacts/nupkg --no-build /p:VersionSuffix=${{ inputs.versionSuffix }} /p:VersionPrefix=${{ inputs.versionPrefix }}
         }   

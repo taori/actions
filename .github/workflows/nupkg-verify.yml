@@ -91,34 +91,12 @@ jobs:
               echo "$($pair[0])=$value" >> $env:GITHUB_OUTPUT
           }     
 
-  composite1:
+  nupkg:
     needs: parameters
     uses: ./.github/workflows/nupkg.yml
     with:
       solutionPath: src/Coverage.sln
-      projectPaths: src/composite1/composite1.csproj
-      versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
-      versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
-      package: ${{ needs.parameters.outputs.package == 'true' }}
-      publish: ${{ needs.parameters.outputs.publish == 'true' }}
-      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
-      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
-      skipTests: ${{ needs.parameters.outputs.skipTests == 'true' }}
-      configuration: ${{ needs.parameters.outputs.configuration }}
-      verbosity: ${{ needs.parameters.outputs.verbosity }}
-      runCoverage: ${{ needs.parameters.outputs.runCoverage == 'true' }}
-      coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
-      concurrencyAbortable: false
-      dotnetVersion: 6.0.x
-    secrets:
-      nuget: ${{ secrets.NUGET }}
-
-  composite2:
-    needs: parameters
-    uses: ./.github/workflows/nupkg.yml
-    with:
-      solutionPath: src/Coverage.sln
-      projectPaths: src/composite2/composite2.csproj
+      packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
       versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
       package: ${{ needs.parameters.outputs.package == 'true' }}

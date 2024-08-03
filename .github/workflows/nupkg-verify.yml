@@ -32,16 +32,6 @@ on:
         description: run dotnet pack?
         default: true
 
-      publish:
-        type: boolean
-        description: run dotnet publish?
-        default: false
-
-      skipTests:
-        type: boolean
-        description: skip tests?
-        default: false
-
       runCoverage:
         type: boolean
         description: run coverage?
@@ -157,12 +147,33 @@ jobs:
               echo "$($pair[0])=$value" >> $env:GITHUB_OUTPUT
           }     
 
-  package:
+  composite1:
     needs: parameters
     uses: taori/actions/.github/workflows/nupkg.yml
     with:
-      solutionPath: src/All.sln
-      projectPaths: src/VideoClipper/VideoClipper.csproj
+      solutionPath: src/composite1/All.sln
+      projectPaths: src/composite1/composite1.csproj
+      versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
+      versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
+      package: ${{ needs.parameters.outputs.package == 'true' }}
+      publish: ${{ needs.parameters.outputs.publish == 'true' }}
+      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
+      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
+      skipTests: ${{ needs.parameters.outputs.skipTests == 'true' }}
+      configuration: ${{ needs.parameters.outputs.configuration }}
+      verbosity: ${{ needs.parameters.outputs.verbosity }}
+      runCoverage: ${{ needs.parameters.outputs.runCoverage }}
+      coverageThresholds: ${{ needs.parameters.outputs.coverageThresholds }}
+      dotnetVersion: 6.0.x
+    secrets:
+      nuget: ${{ secrets.NUGET }}
+
+  composite2:
+    needs: parameters
+    uses: taori/actions/.github/workflows/nupkg.yml
+    with:
+      solutionPath: src/composite2/All.sln
+      projectPaths: src/composite2/composite2.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
       versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
       package: ${{ needs.parameters.outputs.package == 'true' }}

@@ -95,7 +95,7 @@ jobs:
     needs: parameters
     uses: ./.github/workflows/nupkg.yml
     with:
-      solutionPath: src/coverage/All.sln
+      solutionPath: src/Coverage.sln
       projectPaths: src/composite1/composite1.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
       versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
@@ -117,7 +117,7 @@ jobs:
     needs: parameters
     uses: ./.github/workflows/nupkg.yml
     with:
-      solutionPath: src/coverage/All.sln
+      solutionPath: src/Coverage.sln
       projectPaths: src/composite2/composite2.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
       versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}

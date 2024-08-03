@@ -49,6 +49,11 @@ on:
         type: boolean
         default: false
         
+      skipTests:
+        required: false
+        type: boolean
+        default: false
+        
       configuration:
         required: false
         type: string
@@ -90,6 +95,7 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
 
     steps:
+            
     - name: nuget secret verification
       env:
         NUGET: ${{ secrets.nuget }}
@@ -107,12 +113,12 @@ jobs:
     #- name: stop
     #  run: exit 1
       
-    - uses: actions/checkout@v2 
+    - uses: actions/checkout@v3.1.0
       if: ${{ !inputs.skipSolutionBuild }}
 
     - name: Restore dependencies
       if: ${{ !inputs.skipSolutionBuild }}
-      run: dotnet restore ${{ inputs.solutionPath }}
+      run: dotnet restore ${{ inputs.solutionPath }} --ignore-failed-sources
       
     - name: Build
       if: ${{ !inputs.skipSolutionBuild }}
@@ -135,7 +141,6 @@ jobs:
        indicators: true
        output: both
        thresholds: ${{ inputs.coverageThreshold }}
-       
     - name: Pack with csproj version
       shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix == '' }}
@@ -164,19 +169,16 @@ jobs:
       
     - name: Remove old prereleases 
       if: ${{ inputs.removePrereleases }}
-      id: defaults
       shell: pwsh
       run: |  
         & dotnet tool install --global NugetUnlister
         $packages = Get-ChildItem "artifacts/nupkg/" -Filter "*.nupkg" |
          %{ $_.Name } |
-         Select-String -Pattern "(?<packageId>[^\d]+)\.(?<version>[\w\d\.-]+)(?=.nupkg)" |
-         %{ @($_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value) } 
-         
-         foreach ($package in $packages){
-          & nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}
-         }
-        
-        $packageVersion = Get-ChildItem -Recurse -Filter '*.nupkg' | select { $_.Name } -ExpandProperty Name | Select-String -Pattern "\d[\d\w\.\+-]+(?=.nupkg)" | %{$_.Matches.Value}
-        & nuget-unlist drop prereleasebefore ${{ inputs.packageId }} $packageVersion ${{ secrets.nuget }}
+         Select-String -Pattern "(?<packageId>.+)\.(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}(?:[-\w\d.]+)?)(?=.nupkg)" |         
+         %{ , @( $_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value ) } 
+            
+        foreach ($package in $packages){
+            Write-Output "nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}"
+            nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}
+        }
        

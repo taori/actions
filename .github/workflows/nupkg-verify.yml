@@ -149,7 +149,7 @@ jobs:
 
   composite1:
     needs: parameters
-    uses: taori/actions/.github/workflows/nupkg.yml
+    uses: taori/actions/.github/workflows/nupkg.yml@${{github.ref_name}}
     with:
       solutionPath: src/composite1/All.sln
       projectPaths: src/composite1/composite1.csproj
@@ -170,7 +170,7 @@ jobs:
 
   composite2:
     needs: parameters
-    uses: taori/actions/.github/workflows/nupkg.yml
+    uses: taori/actions/.github/workflows/nupkg.yml@${{github.ref_name}}
     with:
       solutionPath: src/composite2/All.sln
       projectPaths: src/composite2/composite2.csproj

@@ -29,11 +29,21 @@ on:
       package:
         required: true
         type: boolean
-        
+      
       publishSymbols:
         required: true
         type: boolean
-        
+      
+      runCoverage:
+        required: true
+        type: boolean
+        default: true
+      
+      skipSolutionBuild:
+        required: false
+        type: boolean
+        default: false
+      
       removePrereleases:
         required: false
         type: boolean
@@ -53,6 +63,11 @@ on:
         required: false
         type: string
         default: "5.0.x, 6.0.x"
+        
+      coverageThreshold:
+        required: false
+        type: string
+        default: '60 80'
         
     secrets:
       nuget:
@@ -105,8 +120,22 @@ jobs:
       
     - name: Test
       if: ${{ !inputs.skipSolutionBuild }}
-      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build 
-              
+      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" --results-directory ./coverage
+             
+    - name: Code Coverage Report
+      if: ${{ inputs.runCoverage }}
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+       filename: coverage/**/coverage.cobertura.xml
+       badge: true
+       fail_below_min: true
+       format: markdown
+       hide_branch_rate: false
+       hide_complexity: true
+       indicators: true
+       output: both
+       thresholds: ${{ inputs.coverageThreshold }}
+       
     - name: Pack with csproj version
       shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix == '' }}
@@ -115,7 +144,7 @@ jobs:
         foreach($project in $projects){
           dotnet pack $project --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} -o artifacts/nupkg --no-build /p:VersionSuffix=${{ inputs.versionSuffix }}
         }        
-              
+         
     - name: Pack manual version
       shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix != '' }}

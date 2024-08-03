@@ -16,62 +16,6 @@ on:
       - synchronize
   
   workflow_dispatch:
-    inputs:
-      versionPrefix:
-        type: string
-        description: e.g 1.1.1
-        default: ""
-
-      versionSuffix:
-        type: string
-        description: e.g alpha.1
-        default: ""
-
-      package:
-        type: boolean
-        description: run dotnet pack?
-        default: true
-
-      runCoverage:
-        type: boolean
-        description: run coverage?
-        default: true
-        
-      coverageThresholds:
-        type: string
-        description: run coverage?
-        default: '60 80'
-
-      publishSymbols:
-        type: boolean
-        description: publish snupkg?
-        default: false
-
-      removePrereleases:
-        type: boolean
-        description: nuget unlist preleases?
-        default: false
-
-      configuration:
-        description: build configuration
-        required: false
-        default: Release
-        type: choice
-        options:
-          - Debug
-          - Release
-
-      verbosity:
-        description: build log verbosity
-        required: false
-        default: minimal
-        type: choice
-        options:
-          - quiet
-          - minimal
-          - normal
-          - detailed
-          - diagnostic
 
 jobs:
 
@@ -149,7 +93,7 @@ jobs:
 
   composite1:
     needs: parameters
-    uses: taori/actions/.github/workflows/nupkg.yml@${{github.ref_name}}
+    uses: ./.github/workflows/nupkg.yml
     with:
       solutionPath: src/composite1/All.sln
       projectPaths: src/composite1/composite1.csproj
@@ -170,7 +114,7 @@ jobs:
 
   composite2:
     needs: parameters
-    uses: taori/actions/.github/workflows/nupkg.yml@${{github.ref_name}}
+    uses: ./.github/workflows/nupkg.yml
     with:
       solutionPath: src/composite2/All.sln
       projectPaths: src/composite2/composite2.csproj

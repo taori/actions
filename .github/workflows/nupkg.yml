@@ -150,7 +150,15 @@ jobs:
        hide_complexity: true
        indicators: true
        output: both
-       thresholds: ${{ inputs.coverageThreshold }}
+       thresholds: ${{ inputs.coverageThreshold }}       
+       
+    - name: Add Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: ${{ github.event_name == 'pull_request' && inputs.runCoverage }} 
+      with:
+        recreate: true
+        path: code-coverage-results.md
+        
     - name: Pack with csproj version
       shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix == '' }}

@@ -18,33 +18,39 @@ on:
     workflow_dispatch:
         inputs:  
         
-            versionSuffix:
-                type: string
-                description: Version suffix for package
-                default: ""
         
             versionPrefix:
                 type: string
-                description: Prefix version such as 0.0.1
+                description: e.g 1.1.1
                 default: ""
-        
+                
+            versionSuffix:
+                type: string
+                description: e.g alpha.1
+                default: ""
+                
             package:
                 type: boolean
+                description: run dotnet pack?
                 default: true
         
             publish:
                 type: boolean
+                description: run dotnet publish?
                 default: false
 
             publishSymbols:
                 type: boolean
+                description: publish snupkg?
                 default: false
 
             removePrereleases:
                 type: boolean
+                description: nuget unlist preleases?
                 default: false
                 
             configuration:
+                description: build configuration
                 required: false
                 default: Release
                 type: choice
@@ -53,6 +59,7 @@ on:
                 - Release
 
             verbosity:
+                description: build log verbosity
                 required: false
                 default: minimal
                 type: choice
@@ -148,5 +155,3 @@ jobs:
         dotnetVersion: 6.0.x
       secrets:
         nuget: ${{ secrets.NUGET }}
-  
-      

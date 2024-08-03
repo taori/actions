@@ -33,7 +33,7 @@ jobs:
       removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}
       skipTests : ${{ steps.parameters.outputs.skipTests }}
       runCoverage : ${{ steps.parameters.outputs.runCoverage }}
-      coverageThresholds : ${{ steps.parameters.outputs.coverageThresholds }}
+      coverageThreshold : ${{ steps.parameters.outputs.coverageThreshold }}
 
     steps:
 
@@ -75,7 +75,7 @@ jobs:
               @("removePrereleases",  "${{github.event.inputs.removePrereleases}}",   "false"),
               @("skipTests",          "${{github.event.inputs.skipTests}}",           "false"),
               @("runCoverage",        "${{github.event.inputs.runCoverage}}",         "true"),
-              @("coverageThresholds", "${{github.event.inputs.coverageThresholds}}",  "60 80")
+              @("coverageThreshold",  "${{github.event.inputs.coverageThreshold}}",   "60 80")
           )
           
           $manual = $('${{github.event_name}}' -eq 'workflow_dispatch')
@@ -107,7 +107,7 @@ jobs:
       configuration: ${{ needs.parameters.outputs.configuration }}
       verbosity: ${{ needs.parameters.outputs.verbosity }}
       runCoverage: ${{ needs.parameters.outputs.runCoverage }}
-      coverageThresholds: ${{ needs.parameters.outputs.coverageThresholds }}
+      coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
       dotnetVersion: 6.0.x
     secrets:
       nuget: ${{ secrets.NUGET }}
@@ -128,7 +128,7 @@ jobs:
       configuration: ${{ needs.parameters.outputs.configuration }}
       verbosity: ${{ needs.parameters.outputs.verbosity }}
       runCoverage: ${{ needs.parameters.outputs.runCoverage }}
-      coverageThresholds: ${{ needs.parameters.outputs.coverageThresholds }}
+      coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
       dotnetVersion: 6.0.x
     secrets:
       nuget: ${{ secrets.NUGET }}

@@ -74,6 +74,16 @@ on:
         type: string
         default: '60 80'
         
+      concurrencyToken:
+        required: false
+        type: string
+        default: ci-${{ github.ref }}
+        
+      concurrencyAbortable:
+        required: true
+        type: boolean
+        default: true
+        
     secrets:
       nuget:
         required: true
@@ -83,8 +93,8 @@ jobs:
   build:
       
     concurrency:    
-      group: ci-${{ github.ref }}
-      cancel-in-progress: true
+      group: ${{ inputs.concurrencyToken }}
+      cancel-in-progress: ${{ inputs.concurrencyAbortable }}      
 
     runs-on: ubuntu-latest
     

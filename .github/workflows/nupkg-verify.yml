@@ -108,6 +108,7 @@ jobs:
       verbosity: ${{ needs.parameters.outputs.verbosity }}
       runCoverage: ${{ needs.parameters.outputs.runCoverage == 'true' }}
       coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
+      concurrencyAbortable: false
       dotnetVersion: 6.0.x
     secrets:
       nuget: ${{ secrets.NUGET }}
@@ -129,6 +130,7 @@ jobs:
       verbosity: ${{ needs.parameters.outputs.verbosity }}
       runCoverage: ${{ needs.parameters.outputs.runCoverage == 'true' }}
       coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
+      concurrencyAbortable: false
       dotnetVersion: 6.0.x
     secrets:
       nuget: ${{ secrets.NUGET }}

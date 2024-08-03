@@ -136,7 +136,7 @@ jobs:
       
     - name: Test
       if: ${{ !inputs.skipSolutionBuild }}
-      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" --results-directory ./coverage
+      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage
              
     - name: Code Coverage Report
       if: ${{ inputs.runCoverage }}

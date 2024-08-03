@@ -2,5 +2,9 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly:ExcludeFromCodeCoverage]
 Console.WriteLine("Hello, World!");
+
+[ExcludeFromCodeCoverage]
+public partial class Program
+{
+}

@@ -227,7 +227,7 @@ jobs:
       shell: pwsh
       run: |  
         $insertion = "${{ steps.codecoverageread.outputs.content }}"        
-        (Get-Content ".\README.md" -Raw) -replace '\[\]\(Coverage section\)(?:[\s]|.)+\[\]\(Coverage section END\)',"[](Coverage section)$insertion[](Coverage section END)" | Out-File ".\README.md"
+        (Get-Content ".\README.md" -Raw) -replace '\[\]\(Coverage section\)(?:[\s]|.)+\[\]\(Coverage section END\)',"[](Coverage section)\r\n$insertion\r\n[](Coverage section END)" | Out-File ".\README.md"
         (Get-Content ".\README.md" -Raw)
         
     - name: Push changes

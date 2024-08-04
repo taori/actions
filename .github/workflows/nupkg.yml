@@ -200,9 +200,9 @@ jobs:
       id: codecoverageread
       run: |
         $content = Get-Content -Path 'code-coverage-results.md' -Raw  
-        echo 'content<<EOF' >> $GITHUB_OUTPUT
-        echo "$content" >> $GITHUB_OUTPUT
-        echo 'EOF' >> $GITHUB_OUTPUT
+        echo 'content<<EOF' >> $env:GITHUB_OUTPUT
+        echo "$content" >> $env:GITHUB_OUTPUT
+        echo 'EOF' >> $env:GITHUB_OUTPUT
         # the upper sequence works for multiline
         #echo "content=$content" >> $env:GITHUB_OUTPUT
         

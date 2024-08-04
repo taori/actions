@@ -88,7 +88,10 @@ on:
     secrets:
       nuget:
         required: true
-  
+        
+permissions: 
+  contents: write
+
 jobs:
   
   build:
@@ -126,6 +129,7 @@ jobs:
       
     - uses: actions/checkout@v4.1.7
       with: 
+        persist-credentials: false
         repository: ${{ github.event.pull_request.head.repo.full_name }} # required for commit
         ref: ${{ github.event.pull_request.head.ref }} # required for commit
 
@@ -226,6 +230,8 @@ jobs:
     - name: Coverage report update in Readme.MD
       if: ${{ inputs.updateReadme }}
       run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
         git add ./README.md
         git commit -m "Coverage report in Readme.MD updated"
         git push

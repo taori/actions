@@ -228,8 +228,8 @@ jobs:
       run: |  
         #github.event.pull_request.merged
         $insertion = "${{ steps.codecoverageread.outputs.content }}"        
-        (Get-Content ".\README.md" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File ".\README.md"
-        (Get-Content ".\README.md" -Raw)
+        (Get-Content ".\README.md" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File ".\README.md" -NoNewLine
+        #(Get-Content ".\README.md" -Raw)
         
     - name: Push changes
       uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4

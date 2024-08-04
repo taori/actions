@@ -233,6 +233,8 @@ jobs:
     - name: Coverage report update in Readme.MD
       if: ${{ inputs.updateReadme }}
       run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
         git add ./README.md
         git commit -m "Coverage report in Readme.MD updated"
         git push

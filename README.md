@@ -11,7 +11,9 @@ composite1 | 100% | 100% | ✔
 **Summary** | **100%** (2 / 2) | **100%** (0 / 0) | ✔
 
 _Minimum allowed line rate is 60%_
+
 <!--CoverageEnd-->
+
 
 
 

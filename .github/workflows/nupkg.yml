@@ -226,10 +226,7 @@ jobs:
       if: ${{ inputs.updateReadme }}
       shell: pwsh
       run: |  
-        $insertion = "${{ steps.codecoverageread.outputs.content }}"
-        
-#        (Get-Content ".\README.md" -Raw) -replace '\[\]\(Coverage section\)(?:[\s]|.)+\[\]\(Coverage section END\)',"[](Coverage section)$insertion[](Coverage section END)" | Out-File ".\README2.md"
-#        Write-Host (Get-Content ".\README2.md" -Raw) -ForegroundColor Blue
+        $insertion = "${{ steps.codecoverageread.outputs.content }}"        
         (Get-Content ".\README.md" -Raw) -replace '\[\]\(Coverage section\)(?:[\s]|.)+\[\]\(Coverage section END\)',"[](Coverage section)$insertion[](Coverage section END)" | Out-File ".\README.md"
         (Get-Content ".\README.md" -Raw)
         

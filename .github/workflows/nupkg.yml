@@ -205,7 +205,7 @@ jobs:
     - name: Update coverage report in Readme.MD
       shell: pwsh
       run: |  
-        (Get-Content .\README.md) -replace '<---Coverage Report--->.+?<---Coverage Report END--->','<---Coverage Report--->${{ steps.codecoverageread.outputs.content }}<---Coverage Report END--->' | Out-File ".\README.md"
+        (Get-Content .\README.md) -replace '<---Coverage Report--->[.\s]+?<---Coverage Report END--->','<---Coverage Report--->${{ steps.codecoverageread.outputs.content }}<---Coverage Report END--->' | Out-File ".\README.md"
         (Get-Content .\README.md)
         
        

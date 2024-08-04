@@ -200,7 +200,7 @@ jobs:
       id: codecoverageread
       run: |
         $content = Get-Content -Path 'code-coverage-results.md' -Raw        
-        echo "content=$content" >> $env:GITHUB_OUTPUT
+        echo "content=$($content)" >> $env:GITHUB_OUTPUT
         
     - name: Update coverage report in Readme.MD
       shell: pwsh

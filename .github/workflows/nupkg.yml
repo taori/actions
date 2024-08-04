@@ -196,6 +196,7 @@ jobs:
         }
 
     - name: read coverage result
+      shell: pwsh
       id: codecoverageread
       run: |
         $content = Get-Content -Path 'code-coverage-results.md' -Raw

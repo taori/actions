@@ -85,6 +85,11 @@ on:
         type: boolean
         default: true
         
+      updateReadmePath:
+        required: false
+        type: string
+        default: "./README.md"
+        
     secrets:
       nuget:
         required: true
@@ -227,8 +232,8 @@ jobs:
       shell: pwsh
       run: |
         $insertion = "${{ steps.codecoverageread.outputs.content }}"        
-        (Get-Content ".\README.md" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File ".\README.md" -NoNewLine
-        #(Get-Content ".\README.md" -Raw)
+        (Get-Content "${{ inputs.updateReadmePath }}" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File "${{ inputs.updateReadmePath }}" -NoNewLine
+        #(Get-Content "${{ inputs.updateReadmePath }}" -Raw)
         
     - name: Push changes
       uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4

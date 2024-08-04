@@ -211,7 +211,7 @@ jobs:
         }
 
     - name: read coverage result
-      if: ${{ inputs.updateReadme }}
+      if: ${{ inputs.updateReadme && github.event.pull_request.merged }}
       shell: pwsh
       id: codecoverageread
       run: |
@@ -223,17 +223,16 @@ jobs:
         #echo "content=$content" >> $env:GITHUB_OUTPUT
         
     - name: Update coverage report in Readme.MD
-      if: ${{ inputs.updateReadme }}
+      if: ${{ inputs.updateReadme && github.event.pull_request.merged }}
       shell: pwsh
-      run: |  
-        #github.event.pull_request.merged
+      run: |
         $insertion = "${{ steps.codecoverageread.outputs.content }}"        
         (Get-Content ".\README.md" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File ".\README.md" -NoNewLine
         #(Get-Content ".\README.md" -Raw)
         
     - name: Push changes
       uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4
-      if: ${{ inputs.updateReadme }}
+      if: ${{ inputs.updateReadme && github.event.pull_request.merged }}
       with:        
         default_author: github_actions
         add: ./README.md

@@ -112,14 +112,16 @@ jobs:
             core.setFailed('"nuget" secret is missing')
         
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3.2.0
+      uses: actions/setup-dotnet@v4.0.1
       with:
         dotnet-version: ${{ inputs.dotnetVersion }}
         
     #- name: stop
     #  run: exit 1
       
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.7
+      with: 
+        persist-credentials: false
 
     - name: Restore dependencies
       run: dotnet restore ${{ inputs.solutionPath }} --ignore-failed-sources
@@ -218,5 +220,5 @@ jobs:
       with:
         committer_name: GitHub Actions
         committer_email: actions@github.com
-        add: .\README.md
+        add: ./README.md
         message: 'Coverage report in Readme.MD updated'

@@ -210,7 +210,7 @@ jobs:
       shell: pwsh
       run: |  
         $insertion = "${{ steps.codecoverageread.outputs.content }}"
-        (Get-Content .\README.md) -replace '<---Coverage Report--->(?:[\s]|.)+<---Coverage Report END--->',"<---Coverage Report--->$insertion<---Coverage Report END--->" | Out-File ".\README.md"
-        (Get-Content .\README.md)
+        (Get-Content ".\README.md" -Raw) -replace '<---Coverage Report--->(?:[\s]|.)+<---Coverage Report END--->',"<---Coverage Report--->$insertion<---Coverage Report END--->" | Out-File ".\README.md"
+        (Get-Content ".\README.md" -Raw)
         
        

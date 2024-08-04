@@ -3,12 +3,13 @@ name: Nuget
 on:
   workflow_call:
     inputs:  
-        
-      solutionPath:
-        required: true
+      
+      packProjects:
         type: string
-        
-      projectPaths:
+        required: true
+        description: 'expects a syntax like: "Path1;Path2"'
+      
+      solutionPath:
         required: true
         type: string
         
@@ -29,11 +30,16 @@ on:
       package:
         required: true
         type: boolean
-        
+      
       publishSymbols:
         required: true
         type: boolean
-        
+      
+      runCoverage:
+        required: true
+        type: boolean
+        default: true
+      
       removePrereleases:
         required: false
         type: boolean
@@ -59,17 +65,48 @@ on:
         type: string
         default: "5.0.x, 6.0.x"
         
+      coverageThreshold:
+        required: false
+        type: string
+        default: '60 80'
+        
+      concurrencyToken:
+        required: false
+        type: string
+        default: ci-${{ github.ref }}
+        
+      concurrencyAbortable:
+        required: true
+        type: boolean
+        default: true
+        
+      updateReadme:
+        required: false
+        type: boolean
+        default: true
+        
+      updateReadmePath:
+        required: false
+        type: string
+        default: "./README.md"
+        
     secrets:
       nuget:
         required: true
-  
+        
+permissions: 
+  contents: 
+    write
+  pull-requests: 
+    write
+
 jobs:
   
   build:
       
     concurrency:    
-      group: ci-${{ github.ref }}
-      cancel-in-progress: true
+      group: ${{ inputs.concurrencyToken }}
+      cancel-in-progress: ${{ inputs.concurrencyAbortable }}      
 
     runs-on: ubuntu-latest
     
@@ -91,42 +128,66 @@ jobs:
             core.setFailed('"nuget" secret is missing')
         
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3.0.0
+      uses: actions/setup-dotnet@v4.0.1
       with:
         dotnet-version: ${{ inputs.dotnetVersion }}
-             
+        
     #- name: stop
     #  run: exit 1
       
-    - uses: actions/checkout@v3.1.0
-      if: ${{ !inputs.skipSolutionBuild }}
+    - uses: actions/checkout@v4.1.7
+      with: 
+        persist-credentials: true
+        repository: ${{ github.event.pull_request.head.repo.full_name }} # required for commit
+        ref: ${{ github.event.pull_request.head.ref }} # required for commit
 
     - name: Restore dependencies
-      if: ${{ !inputs.skipSolutionBuild }}
       run: dotnet restore ${{ inputs.solutionPath }} --ignore-failed-sources
       
     - name: Build
-      if: ${{ !inputs.skipSolutionBuild }}
       run: dotnet build ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-restore 
       
     - name: Test
-      if: ${{ !inputs.skipSolutionBuild && !inputs.skipTests }}
-      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build 
-              
+      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage
+             
+    - name: Code Coverage Report
+      if: ${{ inputs.runCoverage }}
+      uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 #v1.3.0
+      with:
+       filename: coverage/**/coverage.cobertura.xml
+       badge: true
+       fail_below_min: true
+       format: markdown
+       hide_branch_rate: false
+       hide_complexity: true
+       indicators: true
+       output: both
+       thresholds: ${{ inputs.coverageThreshold }}       
+       
+    - name: Add Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 #v2
+      if: ${{ github.event_name == 'pull_request' && inputs.runCoverage }} 
+      with:
+        recreate: true
+        path: code-coverage-results.md
+      
+    - name: Write to Job Summary
+      run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+      
     - name: Pack with csproj version
       shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix == '' }}
       run: |
-        $projects = "${{ inputs.projectPaths }}".Split(";")
+        $projects = "${{ inputs.packProjects }}".Split(";")
         foreach($project in $projects){
           dotnet pack $project --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} -o artifacts/nupkg --no-build /p:VersionSuffix=${{ inputs.versionSuffix }}
         }        
-              
+         
     - name: Pack manual version
       shell: pwsh
       if: ${{ inputs.package && inputs.versionPrefix != '' }}
       run: |
-        $projects = "${{ inputs.projectPaths }}".Split(";")
+        $projects = "${{ inputs.packProjects }}".Split(";")
         foreach($project in $projects){
           dotnet pack $project --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} -o artifacts/nupkg --no-build /p:VersionSuffix=${{ inputs.versionSuffix }} /p:VersionPrefix=${{ inputs.versionPrefix }}
         }   
@@ -153,4 +214,31 @@ jobs:
             Write-Output "nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}"
             nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}
         }
-       
+
+    - name: read coverage result
+      if: ${{ inputs.updateReadme && github.event.pull_request.merged }}
+      shell: pwsh
+      id: codecoverageread
+      run: |
+        $content = Get-Content -Path 'code-coverage-results.md' -Raw  
+        echo 'content<<EOF' >> $env:GITHUB_OUTPUT
+        echo "$content" >> $env:GITHUB_OUTPUT
+        echo 'EOF' >> $env:GITHUB_OUTPUT
+        # the upper sequence works for multiline
+        #echo "content=$content" >> $env:GITHUB_OUTPUT
+        
+    - name: Update coverage report in Readme.MD
+      if: ${{ inputs.updateReadme && github.event.pull_request.merged }}
+      shell: pwsh
+      run: |
+        $insertion = "${{ steps.codecoverageread.outputs.content }}"        
+        (Get-Content "${{ inputs.updateReadmePath }}" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File "${{ inputs.updateReadmePath }}" -NoNewLine
+        #(Get-Content "${{ inputs.updateReadmePath }}" -Raw)
+        
+    - name: Push changes
+      uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4
+      if: ${{ inputs.updateReadme && github.event.pull_request.merged }}
+      with:        
+        default_author: github_actions
+        add: ./README.md
+        message: 'Coverage report in Readme.MD updated'

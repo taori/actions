@@ -227,19 +227,11 @@ jobs:
       shell: pwsh
       run: |  
         $insertion = "${{ steps.codecoverageread.outputs.content }}"
-        (Get-Content ".\README.md" -Raw) -replace '<---Coverage Report--->(?:[\s]|.)+<---Coverage Report END--->',"<---Coverage Report--->$insertion<---Coverage Report END--->" | Out-File ".\README.md"
+        
+#        (Get-Content ".\README.md" -Raw) -replace '\[\]\(Coverage section\)(?:[\s]|.)+\[\]\(Coverage section END\)',"[](Coverage section)$insertion[](Coverage section END)" | Out-File ".\README2.md"
+#        Write-Host (Get-Content ".\README2.md" -Raw) -ForegroundColor Blue
+        (Get-Content ".\README.md" -Raw) -replace '\[\]\(Coverage section\)(?:[\s]|.)+\[\]\(Coverage section END\)',"[](Coverage section)$insertion[](Coverage section END)" | Out-File ".\README.md"
         (Get-Content ".\README.md" -Raw)
-
-#    - name: Coverage report update in Readme.MD
-#      if: ${{ inputs.updateReadme }}
-#      run: |
-#        git config user.name github-actions
-#        git config user.email github-actions@github.com
-#        git add ./README.md
-#        git commit -m "Coverage report in Readme.MD updated"
-#        git push
-#      env:
-#        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Push changes
       uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4

@@ -194,4 +194,15 @@ jobs:
             Write-Output "nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}"
             nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}
         }
+
+    - name: read coverage result
+      id: codecoverageread
+      run: |
+        $content = Get-Content -Path 'code-coverage-results.md' -Raw
+        echo "::set-output name=content::$content"
+        
+    - name: Update coverage report in Readme.MD
+      shell: pwsh
+      run: |  
+        (Get-Content .\README.md) -replace '<---Coverage Report--->.+?<---Coverage Report END--->','${{ steps.codecoverageread.outputs.content }}'
        

@@ -149,7 +149,15 @@ jobs:
       
     - name: Test
       run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage
-
+          
+    - name: Upload coverage
+      uses: actions/upload-artifact@v3.1.3
+      with:
+        name: coverage
+        path: ./coverage
+        if-no-files-found: error
+        retention-days: 1
+          
     - name: remove tiny test files # small test files can be produced by netstandard2.0 projects which are empty and cause problems later on
       shell: pwsh
       run: |

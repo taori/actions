@@ -149,6 +149,11 @@ jobs:
       
     - name: Test
       run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage
+
+    - name: remove tiny test files # small test files can be produced by netstandard2.0 projects which are empty and cause problems later on
+      shell: pwsh
+      run: |
+        Get-ChildItem -File -Path ./coverage -Recurse | where Length -lt 1kb | % { Remove-Item $_.FullName }
              
     - name: Code Coverage Report
       if: ${{ inputs.runCoverage }}

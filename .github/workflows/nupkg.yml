@@ -90,6 +90,11 @@ on:
         type: string
         default: "./README.md"
         
+      testArguments:
+        required: false
+        type: string
+        default: ""
+        
     secrets:
       nuget:
         required: true
@@ -148,7 +153,7 @@ jobs:
       run: dotnet build ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-restore 
       
     - name: Test
-      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage
+      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage ${{ inputs.testArguments }}
           
     - name: Upload coverage
       uses: actions/upload-artifact@v3.1.3

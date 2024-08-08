@@ -154,20 +154,25 @@ jobs:
       
     - name: Test
       run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage ${{ inputs.testArguments }}
-                    
+
+    - name: ReportGenerator
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.3.8
+      with:
+        reports: cobertura.xml
+        targetdir: ./coveragereport
+        reporttypes: Html_Dark;Cobertura;MarkdownSummaryGithub;Badges
+
     - name: coverage post processing # small test files can be produced by netstandard2.0 projects which are empty and cause problems later on
       shell: pwsh
       run: |
-        # Get-ChildItem -File -Path ./coverage -Recurse | where Length -lt 1kb | % { Remove-Item $_.FullName }
-        dotnet tool install --global dotnet-coverage
-        dotnet-coverage merge "./coverage/**/*.coverage" -f cobertura -o ./coverage/merged.cobertura.xml --remove-input-files
+        Get-ChildItem -File -Path ./coveragereport -Recurse
              
     - name: Code Coverage Report
       if: ${{ inputs.runCoverage }}
       uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 #v1.3.0
       with:
        #filename: coverage/**/coverage.cobertura.xml
-       filename: ./coverage/merged.cobertura.xml
+       filename: ./coveragereport/**/*.cobertura.xml
        badge: true
        fail_below_min: true
        format: markdown
@@ -176,6 +181,22 @@ jobs:
        indicators: true
        output: both
        thresholds: ${{ inputs.coverageThreshold }}     
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: reportgenerator
+        path: ./coveragereport/*.*
+        if-no-files-found: error
+        retention-days: 7   
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: irongut report
+        path: code-coverage-results.md
+        if-no-files-found: error
+        retention-days: 7
        
     - name: Add Coverage PR Comment
       uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 #v2

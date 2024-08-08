@@ -161,18 +161,13 @@ jobs:
         reports: ./coverage/**/coverage.cobertura.xml
         targetdir: ./coveragereport
         reporttypes: Html_Dark;Cobertura;MarkdownSummaryGithub;Badges
-
-    - name: coverage post processing # small test files can be produced by netstandard2.0 projects which are empty and cause problems later on
-      shell: pwsh
-      run: |
-        Get-ChildItem -File -Path ./coveragereport -Recurse
              
     - name: Code Coverage Report
       if: ${{ inputs.runCoverage }}
       uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 #v1.3.0
       with:
        #filename: coverage/**/coverage.cobertura.xml
-       filename: ./coveragereport/**/*.cobertura.xml
+       filename: ./coveragereport/Cobertura.md
        badge: true
        fail_below_min: true
        format: markdown

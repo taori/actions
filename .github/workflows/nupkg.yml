@@ -156,6 +156,7 @@ jobs:
       run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage ${{ inputs.testArguments }}
 
     - name: ReportGenerator
+      if: ${{ inputs.runCoverage }} 
       uses: danielpalme/ReportGenerator-GitHub-Action@5.3.8
       with:
         reports: ./coverage/**/coverage.cobertura.xml
@@ -178,6 +179,7 @@ jobs:
        thresholds: ${{ inputs.coverageThreshold }}     
 
     - name: Upload a Build Artifact
+      if: ${{ inputs.runCoverage }} 
       uses: actions/upload-artifact@v4.3.6
       with:
         name: reportgenerator
@@ -186,6 +188,7 @@ jobs:
         retention-days: 7   
 
     - name: Upload a Build Artifact
+      if: ${{ inputs.runCoverage }} 
       uses: actions/upload-artifact@v4.3.6
       with:
         name: irongut report
@@ -195,13 +198,51 @@ jobs:
        
     - name: Add Coverage PR Comment
       uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 #v2
-      if: ${{ github.event_name == 'pull_request' && inputs.runCoverage }} 
+      if: ${{ inputs.runCoverage }} 
       with:
         recreate: true
         path: code-coverage-results.md
       
     - name: Write to Job Summary
+      if: ${{ inputs.runCoverage }} 
       run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+
+    - name: read coverage result
+      if: ${{ inputs.updateReadme && inputs.runCoverage }}
+      shell: pwsh
+      id: codecoverageread
+      run: |
+        $content = Get-Content -Path 'code-coverage-results.md' -Raw  
+        echo 'content<<EOF' >> $env:GITHUB_OUTPUT
+        echo "$content" >> $env:GITHUB_OUTPUT
+        echo "[Coverage details](.coverage/index.html)"
+        echo 'EOF' >> $env:GITHUB_OUTPUT
+        # the upper sequence works for multiline
+        #echo "content=$content" >> $env:GITHUB_OUTPUT
+        
+    - name: Update coverage report in Readme.MD
+      if: ${{ inputs.updateReadme && inputs.runCoverage }}
+      shell: pwsh
+      run: |
+        $insertion = "${{ steps.codecoverageread.outputs.content }}"        
+        (Get-Content "${{ inputs.updateReadmePath }}" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File "${{ inputs.updateReadmePath }}" -NoNewLine
+        #(Get-Content "${{ inputs.updateReadmePath }}" -Raw)
+        
+    - name: Push changes
+      uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4
+      if: ${{ inputs.updateReadme && inputs.runCoverage }}
+      with:        
+        default_author: github_actions
+        add: ./README.md
+        message: 'Coverage report in Readme.MD updated'
+        
+    - name: coverage details
+      if: ${{ inputs.runCoverage }}
+      uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4
+      with:        
+        default_author: github_actions
+        add: ./coveragereport/*.*
+        message: 'Update of coverage details'        
       
     - name: Pack with csproj version
       shell: pwsh
@@ -243,39 +284,3 @@ jobs:
             Write-Output "nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}"
             nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}
         }
-
-    - name: read coverage result
-      if: ${{ inputs.updateReadme }}
-      shell: pwsh
-      id: codecoverageread
-      run: |
-        $content = Get-Content -Path 'code-coverage-results.md' -Raw  
-        echo 'content<<EOF' >> $env:GITHUB_OUTPUT
-        echo "$content" >> $env:GITHUB_OUTPUT
-        echo "[Coverage details](.coverage/index.html)"
-        echo 'EOF' >> $env:GITHUB_OUTPUT
-        # the upper sequence works for multiline
-        #echo "content=$content" >> $env:GITHUB_OUTPUT
-        
-    - name: Update coverage report in Readme.MD
-      if: ${{ inputs.updateReadme }}
-      shell: pwsh
-      run: |
-        $insertion = "${{ steps.codecoverageread.outputs.content }}"        
-        (Get-Content "${{ inputs.updateReadmePath }}" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File "${{ inputs.updateReadmePath }}" -NoNewLine
-        #(Get-Content "${{ inputs.updateReadmePath }}" -Raw)
-        
-    - name: Push changes
-      uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4
-      if: ${{ inputs.updateReadme }}
-      with:        
-        default_author: github_actions
-        add: ./README.md
-        message: 'Coverage report in Readme.MD updated'
-        
-    - name: coverage details
-      uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4
-      with:        
-        default_author: github_actions
-        add: ./README.md
-        message: 'Update of coverage details'

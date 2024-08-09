@@ -126,6 +126,19 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
 
     steps:
+    
+    - name: environment
+      id: environment
+      run: |
+        REPOSITORY_NAME="${{ github.repository }}"
+        OWNER=$(echo $REPOSITORY_NAME | cut -d'/' -f1)
+        REPO=$(echo $REPOSITORY_NAME | cut -d'/' -f2)
+        
+        if [[ "$REPO" == "$OWNER.github.io" ]]; then        
+          echo "pageURL=https://$OWNER.github.io/" >> "$GITHUB_OUTPUT"
+        else
+          echo "pageURL=https://$OWNER.github.io/$REPO/" >> "$GITHUB_OUTPUT"
+        fi        
             
     - name: nuget secret verification
       env:
@@ -141,14 +154,8 @@ jobs:
       with:
         dotnet-version: ${{ inputs.dotnetVersion }}
         
-    - name: Dump GitHub Context
-      run: echo "${{ toJson(github) }}" > github_context.json
-      
-    - name: Display GitHub Context
-      run: cat github_context.json
-        
-    #- name: stop
-    #  run: exit 1
+    - name: stop
+      run: exit 1
       
     - uses: actions/checkout@v4.1.7
       with: 

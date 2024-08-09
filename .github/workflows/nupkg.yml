@@ -161,7 +161,7 @@ jobs:
       with:
         reports: ./coverage/**/coverage.cobertura.xml
         targetdir: ./coveragereport
-        reporttypes: Html_Dark;Cobertura;MarkdownSummaryGithub;Badges
+        reporttypes: Html_Dark;Cobertura
              
     - name: Code Coverage Report
       if: ${{ inputs.runCoverage }}
@@ -215,7 +215,6 @@ jobs:
         $content = Get-Content -Path 'code-coverage-results.md' -Raw  
         echo 'content<<EOF' >> $env:GITHUB_OUTPUT
         echo "$content" >> $env:GITHUB_OUTPUT
-        echo "[Coverage details](.coverage/index.html)"
         echo 'EOF' >> $env:GITHUB_OUTPUT
         # the upper sequence works for multiline
         #echo "content=$content" >> $env:GITHUB_OUTPUT
@@ -236,13 +235,13 @@ jobs:
         add: ./README.md
         message: 'Coverage report in Readme.MD updated'
         
-    - name: coverage details
-      if: ${{ inputs.runCoverage }}
-      uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4
-      with:        
-        default_author: github_actions
-        add: ./coveragereport/*.*
-        message: 'Update of coverage details'        
+    - name: Upload GitHub Pages artifact
+      uses: actions/upload-pages-artifact@v3.0.1
+      with:
+        path: ./coveragereport
+
+    - name: Deploy GitHub Pages site
+      uses: actions/deploy-pages@v4.0.5          
       
     - name: Pack with csproj version
       shell: pwsh

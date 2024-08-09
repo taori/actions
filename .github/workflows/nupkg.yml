@@ -141,6 +141,12 @@ jobs:
       with:
         dotnet-version: ${{ inputs.dotnetVersion }}
         
+    - name: Dump GitHub Context
+      run: echo "${{ toJson(github) }}" > github_context.json
+      
+    - name: Display GitHub Context
+      run: cat github_context.json
+        
     #- name: stop
     #  run: exit 1
       
@@ -224,9 +230,9 @@ jobs:
       if: ${{ inputs.runCoverage }} 
       shell: pwsh
       run: |      
-        echo 'content<<EOF' >> $env:GITHUB_STEP_SUMMARY
+       # echo 'content<<EOF' >> $env:GITHUB_STEP_SUMMARY
         echo "${{ steps.codecoverageread.outputs.content }}" >> $env:GITHUB_STEP_SUMMARY
-        echo 'EOF' >> $env:GITHUB_STEP_SUMMARY
+       # echo 'EOF' >> $env:GITHUB_STEP_SUMMARY
         
     - name: Update coverage report in Readme.MD
       if: ${{ inputs.updateReadme && inputs.runCoverage }}

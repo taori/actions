@@ -222,7 +222,11 @@ jobs:
       
     - name: Write to Job Summary
       if: ${{ inputs.runCoverage }} 
-      run: cat ${{ steps.codecoverageread.outputs.content }} >> $GITHUB_STEP_SUMMARY
+      run: |      
+        echo 'content<<EOF' >> $env:GITHUB_OUTPUT
+        echo "${{ steps.codecoverageread.outputs.content }}" >> $env:GITHUB_STEP_SUMMARY
+        echo 'EOF' >> $env:GITHUB_STEP_SUMMARY
+      #cat ${{ steps.codecoverageread.outputs.content }} >> $GITHUB_STEP_SUMMARY
         
     - name: Update coverage report in Readme.MD
       if: ${{ inputs.updateReadme && inputs.runCoverage }}

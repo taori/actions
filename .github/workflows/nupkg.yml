@@ -154,8 +154,8 @@ jobs:
       with:
         dotnet-version: ${{ inputs.dotnetVersion }}
         
-    - name: stop
-      run: exit 1
+   # - name: stop
+   #   run: exit 1
       
     - uses: actions/checkout@v4.1.7
       with: 
@@ -228,10 +228,8 @@ jobs:
         $content = Get-Content -Path 'code-coverage-results.md' -Raw  
         echo 'content<<EOF' >> $env:GITHUB_OUTPUT
         echo "$content" >> $env:GITHUB_OUTPUT
-        echo "[Coverage details](/docs/index.html)" >> $env:GITHUB_OUTPUT
+        echo "[Coverage details](${{ steps.environment.outputs.pageURL }}/docs/index.html)" >> $env:GITHUB_OUTPUT
         echo 'EOF' >> $env:GITHUB_OUTPUT
-        # the upper sequence works for multiline
-        #echo "content=$content" >> $env:GITHUB_OUTPUT
       
     - name: Write to Job Summary
       if: ${{ inputs.runCoverage }} 

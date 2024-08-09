@@ -135,9 +135,9 @@ jobs:
         REPO=$(echo $REPOSITORY_NAME | cut -d'/' -f2)
         
         if [[ "$REPO" == "$OWNER.github.io" ]]; then        
-          echo "pageURL=https://$OWNER.github.io/" >> "$GITHUB_OUTPUT"
+          echo "pageURL=https://$OWNER.github.io" >> "$GITHUB_OUTPUT"
         else
-          echo "pageURL=https://$OWNER.github.io/$REPO/" >> "$GITHUB_OUTPUT"
+          echo "pageURL=https://$OWNER.github.io/$REPO" >> "$GITHUB_OUTPUT"
         fi        
             
     - name: nuget secret verification

@@ -206,10 +206,6 @@ jobs:
       with:
         recreate: true
         path: code-coverage-results.md
-      
-    - name: Write to Job Summary
-      if: ${{ inputs.runCoverage }} 
-      run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
     - name: read coverage result
       if: ${{ inputs.updateReadme && inputs.runCoverage }}
@@ -223,6 +219,10 @@ jobs:
         echo 'EOF' >> $env:GITHUB_OUTPUT
         # the upper sequence works for multiline
         #echo "content=$content" >> $env:GITHUB_OUTPUT
+      
+    - name: Write to Job Summary
+      if: ${{ inputs.runCoverage }} 
+      run: cat ${{ steps.codecoverageread.outputs.content }} >> $GITHUB_STEP_SUMMARY
         
     - name: Update coverage report in Readme.MD
       if: ${{ inputs.updateReadme && inputs.runCoverage }}

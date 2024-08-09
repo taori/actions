@@ -147,8 +147,8 @@ jobs:
     - name: Display GitHub Context
       run: cat github_context.json
         
-    - name: stop
-      run: exit 1
+    #- name: stop
+    #  run: exit 1
       
     - uses: actions/checkout@v4.1.7
       with: 

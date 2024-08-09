@@ -215,6 +215,7 @@ jobs:
         $content = Get-Content -Path 'code-coverage-results.md' -Raw  
         echo 'content<<EOF' >> $env:GITHUB_OUTPUT
         echo "$content" >> $env:GITHUB_OUTPUT
+        echo "[Coverage details](/docs/index.html)" >> $env:GITHUB_OUTPUT
         echo 'EOF' >> $env:GITHUB_OUTPUT
         # the upper sequence works for multiline
         #echo "content=$content" >> $env:GITHUB_OUTPUT

@@ -222,6 +222,7 @@ jobs:
       
     - name: Write to Job Summary
       if: ${{ inputs.runCoverage }} 
+      shell: pwsh
       run: |      
         echo 'content<<EOF' >> $env:GITHUB_STEP_SUMMARY
         echo "${{ steps.codecoverageread.outputs.content }}" >> $env:GITHUB_STEP_SUMMARY

@@ -261,7 +261,7 @@ jobs:
         path: ./coveragereport
 
     - name: Deploy GitHub Pages site
-      uses: actions/deploy-pages@v3.0.1          
+      uses: actions/deploy-pages@v4.0.5
       
     - name: Pack with csproj version
       shell: pwsh

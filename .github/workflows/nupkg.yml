@@ -133,7 +133,7 @@ jobs:
         REPOSITORY_NAME="${{ github.repository }}"
         OWNER=$(echo $REPOSITORY_NAME | cut -d'/' -f1)
         REPO=$(echo $REPOSITORY_NAME | cut -d'/' -f2)
-        echo "updateRepo=(inputs.updateReadme && github.event.ref_name == github.event.repository.default_branch && (github.event.pull_request.merged == true || github.event_name == 'push' ))"        
+        echo "updateRepo=(inputs.updateReadme && github.event.ref_name == github.event.repository.default_branch && (github.event.pull_request.merged == true || github.event_name == 'push' ))" >> "$GITHUB_OUTPUT"      
         
         if [[ "$REPO" == "$OWNER.github.io" ]]; then        
           echo "pageURL=https://$OWNER.github.io" >> "$GITHUB_OUTPUT"

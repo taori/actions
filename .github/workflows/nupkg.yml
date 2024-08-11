@@ -140,6 +140,12 @@ jobs:
         else
           echo "pageURL=https://$OWNER.github.io/$REPO" >> "$GITHUB_OUTPUT"
         fi        
+
+    - name: Dump environment outputs
+      run: echo "${{ toJson( steps.environment.outputs) }}" > env_outputs.json
+      
+    - name: Display environment outputs
+      run: cat env_outputs.json
             
     - name: nuget secret verification
       env:

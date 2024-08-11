@@ -90,10 +90,10 @@ on:
         type: string
         default: "./README.md"
         
-      testArguments:
+      debugWorkflow:
         required: false
-        type: string
-        default: ""
+        type: boolean
+        default: false
         
     secrets:
       nuget:
@@ -207,7 +207,7 @@ jobs:
        thresholds: ${{ inputs.coverageThreshold }}     
 
     - name: Upload a Build Artifact
-      if: ${{ inputs.runCoverage }} 
+      if: ${{ inputs.runCoverage && inputs.debugWorkflow }} 
       uses: actions/upload-artifact@v4.3.6
       with:
         name: reportgenerator
@@ -216,7 +216,7 @@ jobs:
         retention-days: 7   
 
     - name: Upload a Build Artifact
-      if: ${{ inputs.runCoverage }} 
+      if: ${{ inputs.runCoverage && inputs.debugWorkflow }} 
       uses: actions/upload-artifact@v4.3.6
       with:
         name: irongut report

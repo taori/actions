@@ -181,14 +181,14 @@ jobs:
       run: dotnet build ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-restore 
       
     - name: Test
-      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --blame-hang-timeout 60s --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage ${{ inputs.testArguments }}
+      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --blame-hang-timeout 5m --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage ${{ inputs.testArguments }}
 
     - name: Upload TestResults
       if: always()
       uses: actions/upload-artifact@v4.3.6
       with:
         name: testresults
-        path: TestResults/**/*
+        path: ./coverage/**/*
         if-no-files-found: error
         retention-days: 1
         

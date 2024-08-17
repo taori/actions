@@ -193,7 +193,7 @@ jobs:
       run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage ${{ inputs.testArguments }}
 
     - name: Upload TestResults
-      if: always()
+      if: always() && false
       uses: actions/upload-artifact@v4.3.6
       with:
         name: testresults

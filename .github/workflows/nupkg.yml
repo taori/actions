@@ -112,12 +112,17 @@ permissions:
 jobs:
   
   build:
+    
+    
       
     concurrency:    
       group: ${{ inputs.concurrencyToken }}
       cancel-in-progress: ${{ inputs.concurrencyAbortable }}      
 
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
     
     env:            
       DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
@@ -129,6 +134,7 @@ jobs:
     
     - name: environment
       id: environment
+      shell: bash
       run: |
         REPOSITORY_NAME="${{ github.repository }}"
         OWNER=$(echo $REPOSITORY_NAME | cut -d'/' -f1)

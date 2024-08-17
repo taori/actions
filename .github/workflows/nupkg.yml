@@ -95,6 +95,11 @@ on:
         type: boolean
         default: false
         
+      testArguments:
+        required: false
+        type: string
+        default: ""
+        
     secrets:
       nuget:
         required: true

@@ -207,7 +207,16 @@ jobs:
       with:
         reports: ./coverage/**/coverage.cobertura.xml
         targetdir: ./coveragereport
-        reporttypes: Html_Dark;Cobertura
+        reporttypes: Html_Dark;Cobertura    
+
+    - name: Upload a Build Artifact
+      if: ${{ inputs.runCoverage && inputs.debugWorkflow }} 
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: reportgenerator
+        path: ./coveragereport/*.*
+        if-no-files-found: error
+        retention-days: 7   
              
     - name: Code Coverage Report
       if: ${{ inputs.runCoverage }}
@@ -222,16 +231,7 @@ jobs:
        hide_complexity: true       
        indicators: true
        output: both
-       thresholds: ${{ inputs.coverageThreshold }}     
-
-    - name: Upload a Build Artifact
-      if: ${{ inputs.runCoverage && inputs.debugWorkflow }} 
-      uses: actions/upload-artifact@v4.3.6
-      with:
-        name: reportgenerator
-        path: ./coveragereport/*.*
-        if-no-files-found: error
-        retention-days: 7   
+       thresholds: ${{ inputs.coverageThreshold }} 
 
     - name: Upload a Build Artifact
       if: ${{ inputs.runCoverage && inputs.debugWorkflow }} 

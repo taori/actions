@@ -332,4 +332,4 @@ jobs:
          Select-String -Pattern "(?<packageId>.+)\.(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}(?:[-\w\d.]+)?)(?=.nupkg)" | `
          %{ , @( $_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value ) } | `
          % { Write-Output "nuget-unlist drop prereleasebefore $($_[0]) $($_[1]) ${{ secrets.nuget }}" `
-           nuget-unlist drop prereleasebefore $_[0] $_[1] ${{ secrets.nuget }} }
+           & nuget-unlist drop prereleasebefore $_[0] $_[1] ${{ secrets.nuget }} }

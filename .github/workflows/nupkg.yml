@@ -330,9 +330,5 @@ jobs:
          $packages = Get-ChildItem "artifacts/nupkg/" -Filter "*.nupkg" | `
          %{ $_.Name } | `
          Select-String -Pattern "(?<packageId>.+)\.(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}(?:[-\w\d.]+)?)(?=.nupkg)" | `
-         %{ , @( $_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value ) } |
-            
-        foreach ($package in $packages){
-            Write-Output "nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}"
-            nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}
-        }
+         %{ , @( $_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value ) } | `
+         % { Write-Output "nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }}" && nuget-unlist drop prereleasebefore $package[0] $package[1] ${{ secrets.nuget }} }

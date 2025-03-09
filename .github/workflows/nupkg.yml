@@ -290,11 +290,14 @@ jobs:
       if: ${{ inputs.runCoverage && steps.environment.outputs.updateRepo=='true' }}
       uses: actions/upload-pages-artifact@v3.0.1
       with:
+        name: coverage
         path: ./coveragereport
 
     - name: Deploy GitHub Pages site
       if: ${{ inputs.runCoverage && steps.environment.outputs.updateRepo=='true' }}
       uses: actions/deploy-pages@v4.0.5
+      with:
+        name: coverage
       
     - name: Pack with csproj version
       shell: pwsh

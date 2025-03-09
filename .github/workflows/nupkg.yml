@@ -297,7 +297,7 @@ jobs:
       if: ${{ inputs.runCoverage && steps.environment.outputs.updateRepo=='true' }}
       uses: actions/deploy-pages@v4.0.5
       with:
-        name: coverage
+        artifact_name: coverage
       
     - name: Pack with csproj version
       shell: pwsh

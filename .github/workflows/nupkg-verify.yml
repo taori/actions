@@ -67,7 +67,7 @@ jobs:
           $values = @(
               @("versionSuffix",      "$suffix",                                      "$suffix"),
               @("versionPrefix",      "${{github.event.inputs.versionPrefix}}",       ""),
-              @("configuration",      "${{github.event.inputs.configuration}}",       "Release"),
+              @("configuration",      "Release",       "Release"),
               @("verbosity",          "minimal",                                      "minimal"),
               @("publish",            "${{github.event.inputs.publish}}",             "false"),
               @("package",            "${{github.event.inputs.package}}",             "true"),

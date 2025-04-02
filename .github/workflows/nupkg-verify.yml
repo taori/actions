@@ -91,7 +91,7 @@ jobs:
               echo "$($pair[0])=$value" >> $env:GITHUB_OUTPUT
           }     
 
-  nupkg:
+  ubuntu-22-04-nupkg:
     needs: parameters
     uses: ./.github/workflows/nupkg.yml
     with:
@@ -110,6 +110,32 @@ jobs:
       coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
       concurrencyAbortable: false
       agentEnv: ubuntu-22.04
+      dotnetVersion: |
+        6.0.x
+        8.0.x
+    secrets:
+      nuget: ${{ secrets.NUGET }} 
+      
+  ubuntu-latest-nupkg:
+    name: ubuntu-22.04 latest
+    needs: parameters
+    uses: ./.github/workflows/nupkg.yml
+    with:
+      solutionPath: src/Coverage.sln
+      packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
+      versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
+      versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
+      package: ${{ needs.parameters.outputs.package == 'true' }}
+      publish: ${{ needs.parameters.outputs.publish == 'true' }}
+      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
+      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
+      skipTests: ${{ needs.parameters.outputs.skipTests == 'true' }}
+      configuration: ${{ needs.parameters.outputs.configuration }}
+      verbosity: ${{ needs.parameters.outputs.verbosity }}
+      runCoverage: ${{ needs.parameters.outputs.runCoverage == 'true' }}
+      coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
+      concurrencyAbortable: false
+      agentEnv: ubuntu-latest
       dotnetVersion: |
         6.0.x
         8.0.x

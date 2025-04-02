@@ -109,6 +109,7 @@ jobs:
       runCoverage: ${{ needs.parameters.outputs.runCoverage == 'true' }}
       coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
       concurrencyAbortable: false
+      agentEnv: ubuntu-22.04
       dotnetVersion: |
         6.0.x
         8.0.x

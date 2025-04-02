@@ -117,7 +117,6 @@ jobs:
       nuget: ${{ secrets.NUGET }} 
       
   ubuntu-latest-nupkg:
-    name: ubuntu-22.04 latest
     needs: parameters
     uses: ./.github/workflows/nupkg.yml
     with:

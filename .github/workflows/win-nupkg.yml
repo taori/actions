@@ -73,7 +73,7 @@ on:
       concurrencyToken:
         required: false
         type: string
-        default: ci-${{ github.ref }}
+        default: ci-${{ github.ref }}-win
         
       concurrencyAbortable:
         required: true

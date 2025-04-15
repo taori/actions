@@ -95,8 +95,8 @@ jobs:
     needs: parameters
     uses: ./.github/workflows/win-nupkg.yml
     with:
-      solutionPath: src/Coverage.sln
-      packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
+      solutionPath: src\Coverage.sln
+      packProjects: src\composite1\composite1.csproj;src\composite2\composite2.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
       versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
       package: ${{ needs.parameters.outputs.package == 'true' }}
@@ -120,8 +120,8 @@ jobs:
     needs: parameters
     uses: ./.github/workflows/win-nupkg.yml
     with:
-      solutionPath: src/Coverage.sln
-      packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
+      solutionPath: src\Coverage.sln
+      packProjects: src\composite1\composite1.csproj;src\composite2\composite2.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
       versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
       package: ${{ needs.parameters.outputs.package == 'true' }}

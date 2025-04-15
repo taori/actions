@@ -1,0 +1,142 @@
+﻿name: win-nupkg-verify.yml
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - .github/workflows/*
+      - src/**/*
+      - tests/**/*
+  
+  pull_request:
+    branches: [ main ]
+    types:
+      - opened
+      - reopened
+      - synchronize
+  
+  workflow_dispatch:
+
+jobs:
+
+  parameters:
+    runs-on: windows-latest
+    
+    outputs:
+      versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
+      versionPrefix : ${{ steps.parameters.outputs.versionPrefix }}
+      configuration : ${{ steps.parameters.outputs.configuration }}
+      verbosity : ${{ steps.parameters.outputs.verbosity }}
+      publish : ${{ steps.parameters.outputs.publish }}
+      package : ${{ steps.parameters.outputs.package }}
+      publishSymbols : ${{ steps.parameters.outputs.publishSymbols }}
+      removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}
+      skipTests : ${{ steps.parameters.outputs.skipTests }}
+      runCoverage : ${{ steps.parameters.outputs.runCoverage }}
+      coverageThreshold : ${{ steps.parameters.outputs.coverageThreshold }}
+
+    steps:
+
+      - name: nuget secret verification
+        env:
+          NUGET: ${{ secrets.NUGET }}
+        if: "${{ env.NUGET == '' }}"
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('"nuget" secret is missing')
+
+      - name: Setting up parameters
+        id: parameters
+        shell: pwsh
+        run: |
+          Write-Host "Setting up parameters"
+          
+          $suffixMap = @{
+              "push"="alpha.${{github.run_number}}"; 
+              "pull_request"="beta.${{github.run_number}}"; 
+              "workflow_dispatch"="${{github.event.inputs.versionSuffix}}"
+          };
+          $suffix = $suffixMap['${{github.event_name}}']
+          if( $suffixMap['workflow_dispatch'] -ne '' -and '${{github.event_name}}' -eq 'workflow_dispatch'){
+              $suffix = $($suffix.TrimEnd('.') + ".")
+              $suffix = "$($suffix)${{github.run_number}}"
+          }  
+          
+          #   key name                workflow value                                  fallback value
+          $values = @(
+              @("versionSuffix",      "$suffix",                                      "$suffix"),
+              @("versionPrefix",      "${{github.event.inputs.versionPrefix}}",       ""),
+              @("configuration",      "Release",       "Release"),
+              @("verbosity",          "minimal",                                      "minimal"),
+              @("publish",            "${{github.event.inputs.publish}}",             "false"),
+              @("package",            "${{github.event.inputs.package}}",             "true"),
+              @("publishSymbols",     "${{github.event.inputs.publishSymbols}}",      "false"),
+              @("removePrereleases",  "${{github.event.inputs.removePrereleases}}",   "false"),
+              @("skipTests",          "${{github.event.inputs.skipTests}}",           "false"),
+              @("runCoverage",        "${{github.event.inputs.runCoverage}}",         "true"),
+              @("coverageThreshold",  "${{github.event.inputs.coverageThreshold}}",   "60 80")
+          )
+          
+          $manual = $('${{github.event_name}}' -eq 'workflow_dispatch')
+          
+          foreach($pair in $values){
+              $value = $pair[2]
+              if($manual -eq $true){
+                  $value = $pair[1]
+              }
+          
+              Write-Host "Setting parameter $($pair[0]) => $value"
+              #echo "::set-output name=$($pair[0])::$value"
+              echo "$($pair[0])=$value" >> $env:GITHUB_OUTPUT
+          }     
+
+  windows-2022-nupkg:
+    needs: parameters
+    uses: ./.github/workflows/win-nupkg.yml
+    with:
+      solutionPath: src/Coverage.sln
+      packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
+      versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
+      versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
+      package: ${{ needs.parameters.outputs.package == 'true' }}
+      publish: ${{ needs.parameters.outputs.publish == 'true' }}
+      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
+      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
+      skipTests: ${{ needs.parameters.outputs.skipTests == 'true' }}
+      configuration: ${{ needs.parameters.outputs.configuration }}
+      verbosity: ${{ needs.parameters.outputs.verbosity }}
+      runCoverage: ${{ needs.parameters.outputs.runCoverage == 'true' }}
+      coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
+      concurrencyAbortable: false
+      agentEnv: windows-2022
+      dotnetVersion: |
+        6.0.x
+        8.0.x
+    secrets:
+      nuget: ${{ secrets.NUGET }} 
+      
+  windows-latest-nupkg:
+    needs: parameters
+    uses: ./.github/workflows/win-nupkg.yml
+    with:
+      solutionPath: src/Coverage.sln
+      packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
+      versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
+      versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
+      package: ${{ needs.parameters.outputs.package == 'true' }}
+      publish: ${{ needs.parameters.outputs.publish == 'true' }}
+      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
+      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
+      skipTests: ${{ needs.parameters.outputs.skipTests == 'true' }}
+      configuration: ${{ needs.parameters.outputs.configuration }}
+      verbosity: ${{ needs.parameters.outputs.verbosity }}
+      runCoverage: ${{ needs.parameters.outputs.runCoverage == 'true' }}
+      coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
+      concurrencyAbortable: false
+      agentEnv: windows-latest
+      dotnetVersion: |
+        6.0.x
+        8.0.x
+    secrets:
+      nuget: ${{ secrets.NUGET }}

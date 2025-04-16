@@ -78,7 +78,9 @@ jobs:
 
       - name: "build + test + package ${{ matrix.buildEnv }}"
         id: build
-        uses: ./.github/workflows/nupkg.yml
+#        taori/actions/.github/workflows/nupkg.yml@v9
+        uses: taori/actions/.github/workflows/nupkg.yml@v9-windows-support
+#        uses: ./.github/workflows/nupkg.yml
         with:          
           solutionPath: src/Coverage.sln
           packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj

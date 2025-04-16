@@ -139,6 +139,9 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
 
     steps:
+      
+    - name: stop
+      run: exit 1
     
     - name: environment
       id: environment

@@ -36,6 +36,8 @@ jobs:
       coverageThreshold : ${{ steps.parameters.outputs.coverageThreshold }}
 
     steps:
+      - name: stop
+        run: exit 1
 
       - name: nuget secret verification
         env:

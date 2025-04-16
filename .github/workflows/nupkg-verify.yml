@@ -104,5 +104,3 @@ jobs:
           removePrereleases: ${{ steps.parameters.outputs.removePrereleases == 'true' }}
           publishSymbols: ${{ steps.parameters.outputs.publishSymbols == 'true' }}
           debugWorkflow: true
-        secrets:
-          nuget: ${{ secrets.NUGET }}

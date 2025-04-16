@@ -49,7 +49,7 @@ on:
       concurrencyToken:
         required: false
         type: string
-        default: ci-${{ github.ref }}-ubuntu
+        default: ci-${{ github.ref }}-${{ inputs.buildEnv}}
         
       concurrencyAbortable:
         required: false

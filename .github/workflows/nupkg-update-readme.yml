@@ -18,6 +18,11 @@ on:
         description: 'name of the artifact that contains the nuget packages'
         type: string
         required: true
+        
+      newArtifactName:
+        description: 'name of the artifact that contains the nuget packages'
+        type: string
+        required: true
       
       debugWorkflow:
         required: false
@@ -46,6 +51,10 @@ jobs:
         with:
           name: ${{ inputs.artifactName }}
           path: ./artifact-export
+
+      - name: output artifact folder structure
+        if: ${{ inputs.debugWorkflow }}
+        run: ls -R ./artifact-export
           
       - name: unzip packages
         shell: pwsh
@@ -58,11 +67,19 @@ jobs:
           Get-ChildItem -Path "./modified" -Filter "${{ inputs.readmeFileName }}" -Recurse | ForEach-Object { Copy-Item "${{ inputs.readmePath }}" -Destination $_.FullName -Force }
           New-Item ./zipped -Type Directory
           Get-ChildItem -Path "./modified" -Filter "*.nupkg" -Recurse | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath "./zipped/$($_.Name)" }
+
+      - name: output folder structure - modified
+        if: ${{ inputs.debugWorkflow }}
+        run: ls -R ./modified
+        
+      - name: output folder structure - zipped
+        if: ${{ inputs.debugWorkflow }}
+        run: ls -R ./zipped
             
       - name: upload modified artifact
         uses: actions/upload-artifact@v4.3.6
         with:
-          name: "${{ inputs.artifactName }}-patched"
+          name: "${{ inputs.newArtifactName }}"
           path: ./zipped/*.nupkg
           if-no-files-found: error
           retention-days: 1

@@ -107,6 +107,7 @@ jobs:
     uses: ./.github/workflows/nupkg-update-readme.yml
     with:
       artifactName: ${{ needs.build.outputs.artifact-name-nupkg }}
+      newArtifactName: "${{ needs.build.outputs.artifact-name-nupkg }}-patched"
       readmePath: "./README.md"
       readmeFileName: "README.md"
       debugWorkflow: true

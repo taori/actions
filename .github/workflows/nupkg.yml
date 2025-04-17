@@ -5,11 +5,11 @@ on:
     outputs:
       artifact-name-cobertura:
         description: "The name of the cobertura artifact reference"
-        value: ${{ jobs.build.outputs.cobertura }}
+        value: ${{ jobs.execute.outputs.cobertura }}
         
       artifact-name-nupkg:
         description: "The name of the nupkg artifact reference"
-        value: ${{ jobs.build.outputs.nupkg }}
+        value: ${{ jobs.execute.outputs.nupkg }}
         
     inputs:      
       packProjects:
@@ -83,7 +83,7 @@ on:
 
 jobs:
   
-  build:
+  execute:
     
     outputs:
       nupkg: ${{ steps.upload-nupkg.outputs.result }}

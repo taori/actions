@@ -148,13 +148,13 @@ jobs:
         ref: ${{ github.event.pull_request.head.ref }} # required for commit
 
     - name: Restore dependencies
-      run: dotnet restore ${{ inputs.solutionPath }} --ignore-failed-sources
+      run: dotnet restore "${{ inputs.solutionPath }}" --ignore-failed-sources
       
     - name: Build
-      run: dotnet build ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-restore 
+      run: dotnet build "${{ inputs.solutionPath }}" --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-restore 
       
     - name: Test
-      run: dotnet test ${{ inputs.solutionPath }} --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura --results-directory ./coverage ${{ inputs.testArguments }}
+      run: dotnet test "${{ inputs.solutionPath }}" --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" -property:CoverletOutputFormat=cobertura --results-directory "./coverage" ${{ inputs.testArguments }}
            
     - name: Pack with csproj version
       shell: pwsh

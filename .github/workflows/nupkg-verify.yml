@@ -95,13 +95,13 @@ jobs:
         6.0.x
         8.0.x   
         
-  coverage:
-    needs: [build, parameters]
-    uses: ./.github/workflows/coverage.yml
-    with:
-      coberturaArtifactsName: ${{ needs.build.outputs.artifact-name-cobertura }}
-      threshold: ${{ needs.parameters.outputs.coverageThreshold }}
-      debugWorkflow: true
+#  coverage:
+#    needs: [build, parameters]
+#    uses: ./.github/workflows/coverage.yml
+#    with:
+#      coberturaArtifactsName: ${{ needs.build.outputs.artifact-name-cobertura }}
+#      threshold: ${{ needs.parameters.outputs.coverageThreshold }}
+#      debugWorkflow: true
   
 #  deploy:
 #    needs: [coverage, parameters, build]

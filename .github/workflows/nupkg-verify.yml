@@ -115,7 +115,7 @@ jobs:
     uses: ./.github/workflows/publish-nupkg.yml
     if: ${{ needs.parameters.outputs.publish == 'true' }}
     with:
-      nupkgArtifactName: ${{ needs.build.outputs.artifact-name-nupkg }}
+      nupkgArtifactName: "${{ needs.build.outputs.artifact-name-nupkg }}-patched"
       removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
       publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}      
       debugWorkflow: true

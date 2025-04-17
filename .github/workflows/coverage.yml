@@ -149,7 +149,7 @@ jobs:
         shell: pwsh
         run: |
           $insertion = "${{ steps.codecoverageread.outputs.content }}"        
-          (Get-Content "${{ inputs.readmePath }}" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File "${{ inputs.updateReadmePath }}" -NoNewLine
+          (Get-Content "${{ inputs.readmePath }}" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File "${{ inputs.readmePath }}" -NoNewLine
           #(Get-Content "${{ inputs.updateReadmePath }}" -Raw)
 
       - name: Push changes

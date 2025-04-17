@@ -81,9 +81,7 @@ jobs:
               echo "$($pair[0])=$value" >> $env:GITHUB_OUTPUT
           }    
 
-  build:
-        
-    name: "build + test + package"
+  build:        
     needs: [parameters]
     uses: ./.github/workflows/nupkg.yml
     with:          

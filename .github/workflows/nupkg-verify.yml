@@ -24,6 +24,12 @@ jobs:
       matrix:
         buildEnv: ["ubuntu-22.04", "ubuntu-latest"]
     runs-on: ${{ matrix.buildEnv }}
+    
+    outputs:
+      publish : ${{ steps.parameters.outputs.publish }}
+      publishSymbols : ${{ steps.parameters.outputs.publishSymbols }}
+      removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}
+      coverageThreshold : ${{ steps.parameters.outputs.coverageThreshold }}
 
     steps:
 
@@ -76,33 +82,36 @@ jobs:
               echo "$($pair[0])=$value" >> $env:GITHUB_OUTPUT
           }    
 
-      - name: "build + test + package ${{ matrix.buildEnv }}"
-        id: build
-#        taori/actions/.github/workflows/nupkg.yml@v9
-        uses: taori/actions/.github/workflows/nupkg.yml@v9-windows-support
-#        uses: ./.github/workflows/nupkg.yml
-        with:          
-          solutionPath: src/Coverage.sln
-          packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
-          versionSuffix: ${{ steps.parameters.outputs.versionSuffix }}
-          versionPrefix: ${{ steps.parameters.outputs.versionPrefix }}
-          buildEnv: ${{ matrix.buildEnv }}
-          dotnetVersion: |
-            6.0.x
-            8.0.x      
-                  
-      - name: "coverage"
-        uses: ./.github/workflows/coverage.yml
-        with:
-          coberturaArtifactsName: ${{ steps.build.outputs.artifact-name-cobertura }}
-          threshold: ${{ steps.parameters.outputs.coverageThreshold }}
-          debugWorkflow: true
-          
-      - name: "publish"
-        uses: ./.github/workflows/publish-nupkg.yml
-        if: ${{ steps.parameters.outputs.publish == 'true' }}
-        with:
-          nupkgArtifactName: ${{ steps.build.outputs.artifact-name-nupkg }}
-          removePrereleases: ${{ steps.parameters.outputs.removePrereleases == 'true' }}
-          publishSymbols: ${{ steps.parameters.outputs.publishSymbols == 'true' }}
-          debugWorkflow: true
+  build:
+    name: "build + test + package ${{ matrix.buildEnv }}"
+    needs: [parameters]
+    uses: ./.github/workflows/nupkg.yml
+    with:          
+      solutionPath: src/Coverage.sln
+      packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
+      versionSuffix: ${{ steps.parameters.outputs.versionSuffix }}
+      versionPrefix: ${{ steps.parameters.outputs.versionPrefix }}
+      buildEnv: ${{ matrix.buildEnv }}
+      dotnetVersion: |
+        6.0.x
+        8.0.x   
+        
+  coverage:
+    needs: build
+    uses: ./.github/workflows/coverage.yml
+    with:
+      coberturaArtifactsName: ${{ needs.build.outputs.artifact-name-cobertura }}
+      threshold: ${{ needs.parameters.outputs.coverageThreshold }}
+      debugWorkflow: true
+  
+  deploy:
+    needs: coverage
+    uses: ./.github/workflows/publish-nupkg.yml
+    if: ${{ needs.parameters.outputs.publish == 'true' }}
+    with:
+      nupkgArtifactName: ${{ needs.build.outputs.artifact-name-nupkg }}
+      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
+      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}      
+      debugWorkflow: true
+    secrets:
+      nuget: ${{ secrets.NUGET }} 

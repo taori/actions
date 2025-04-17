@@ -30,6 +30,8 @@ jobs:
       publishSymbols : ${{ steps.parameters.outputs.publishSymbols }}
       removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}
       coverageThreshold : ${{ steps.parameters.outputs.coverageThreshold }}
+      versionPrefix : ${{ steps.parameters.outputs.versionPrefix }}
+      versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
 
     steps:
 
@@ -89,15 +91,15 @@ jobs:
     with:          
       solutionPath: src/Coverage.sln
       packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
-      versionSuffix: ${{ steps.parameters.outputs.versionSuffix }}
-      versionPrefix: ${{ steps.parameters.outputs.versionPrefix }}
+      versionSuffix: ${{ jobs.parameters.outputs.versionSuffix }}
+      versionPrefix: ${{ jobs.parameters.outputs.versionPrefix }}
       buildEnv: ${{ matrix.buildEnv }}
       dotnetVersion: |
         6.0.x
         8.0.x   
         
   coverage:
-    needs: build
+    needs: [build, parameters]
     uses: ./.github/workflows/coverage.yml
     with:
       coberturaArtifactsName: ${{ needs.build.outputs.artifact-name-cobertura }}
@@ -105,7 +107,7 @@ jobs:
       debugWorkflow: true
   
   deploy:
-    needs: coverage
+    needs: [coverage, parameters, build]
     uses: ./.github/workflows/publish-nupkg.yml
     if: ${{ needs.parameters.outputs.publish == 'true' }}
     with:

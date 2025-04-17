@@ -47,9 +47,9 @@ on:
         default: "5.0.x, 6.0.x"
         
       concurrencyToken:
-        required: true
+        required: false
         type: string
-        #default: ci-${{ github.ref }}-${{ inputs.buildEnv}}
+        default: ci-${{ github.ref }}-${{ inputs.buildEnv}}
         
       concurrencyAbortable:
         required: false
@@ -80,16 +80,6 @@ on:
         required: false
         type: string
         default: "nupkg-raw"
-        
-#permissions: 
-#  contents: 
-#    write
-#  pull-requests: 
-#    write
-#  pages: 
-#    write
-#  id-token: 
-#    write
 
 jobs:
   

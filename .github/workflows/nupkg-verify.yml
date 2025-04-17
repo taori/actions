@@ -89,7 +89,7 @@ jobs:
       packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
       versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
-      concurrencyToken: 'ci-${{ github.ref }}-ubuntu-latest'
+      #concurrencyToken: 'ci-${{ github.ref }}-ubuntu-latest'
       buildEnv: "ubuntu-latest"
       dotnetVersion: |
         6.0.x

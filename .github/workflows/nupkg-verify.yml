@@ -108,6 +108,7 @@ jobs:
     with:
       artifactName: ${{ needs.build.outputs.artifact-name-nupkg }}
       readmePath: "./README.md"
+      readmeFileName: "README.md"
       debugWorkflow: true
   
   deploy:

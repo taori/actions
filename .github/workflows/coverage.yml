@@ -138,6 +138,12 @@ jobs:
            echo "${{ steps.codecoverageread.outputs.content }}" >> $env:GITHUB_STEP_SUMMARY
           # echo 'EOF' >> $env:GITHUB_STEP_SUMMARY
 
+      - uses: actions/checkout@v4.1.7
+        with:
+          persist-credentials: true
+          repository: ${{ github.event.pull_request.head.repo.full_name }} # required for commit
+          ref: ${{ github.event.pull_request.head.ref }} # required for commit
+          
       - name: Update coverage report in Readme.MD
         if: ${{ inputs.updateReadme && inputs.readmePath != '' }}
         shell: pwsh

@@ -103,7 +103,7 @@ jobs:
       group: ${{ inputs.concurrencyToken }}
       cancel-in-progress: ${{ inputs.concurrencyAbortable }}      
 
-    runs-on: ${{ inputs.agentEnv }}
+    runs-on: ${{ inputs.buildEnv }}
     defaults:
       run:
         shell: bash

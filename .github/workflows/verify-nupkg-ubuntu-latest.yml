@@ -83,7 +83,7 @@ jobs:
 
   build:        
     needs: [parameters]
-    uses: ./.github/workflows/dotnet-package-build.yml
+    uses: ./.github/workflows/nupkg-build.yml
     with:          
       solutionPath: src/Coverage.sln
       packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
@@ -104,7 +104,7 @@ jobs:
         
   updatePackage:
     needs: [build, coverage]
-    uses: ./.github/workflows/update-nupkg-readme.yml
+    uses: ./.github/workflows/nupkg-update-readme.yml
     with:
       artifactName: ${{ needs.build.outputs.artifact-name-nupkg }}
       readmePath: "./README.md"
@@ -113,7 +113,7 @@ jobs:
   
   deploy:
     needs: [parameters, build, updatePackage]
-    uses: ./.github/workflows/publish-nupkg.yml
+    uses: ./.github/workflows/nupkg-publish.yml
     if: ${{ needs.parameters.outputs.publish == 'true' }}
     with:
       nupkgArtifactName: "${{ needs.build.outputs.artifact-name-nupkg }}-patched"

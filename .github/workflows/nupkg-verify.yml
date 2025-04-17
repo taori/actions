@@ -82,11 +82,8 @@ jobs:
           }    
 
   build:
-    strategy:
-      matrix:
-        buildEnv: ["ubuntu-22.04", "ubuntu-latest"]
         
-    name: "build + test + package ${{ matrix.buildEnv }}"
+    name: "build + test + package"
     needs: [parameters]
     uses: ./.github/workflows/nupkg.yml
     with:          
@@ -94,7 +91,7 @@ jobs:
       packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
       versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
-      buildEnv: ${{ matrix.buildEnv }}
+      buildEnv: "ubuntu-latest"
       dotnetVersion: |
         6.0.x
         8.0.x   

@@ -5,9 +5,14 @@ on:
     
     inputs:
       readmePath:
+        description: 'The path to the readme file within the repo'
         type: string
         required: true
-        description: ''
+        
+      readmeFileName:
+        description: 'The name of the readme file - e.g. README.md'
+        type: string
+        required: true
         
       artifactName:
         description: 'name of the artifact that contains the nuget packages'
@@ -50,9 +55,9 @@ jobs:
         shell: pwsh
         run: |
           Copy-Item -Recurse -Path ./unzipped -Destination ./modified
-          Get-ChildItem -Path ./modified -Filter "README.md" -Recurse | ForEach-Object { Copy-Item ./README.md -Destination $_.FullName -Force }
+          Get-ChildItem -Path "./modified" -Filter "${{ inputs.readmeFileName }}" -Recurse | ForEach-Object { Copy-Item "${{ inputs.readmePath }}" -Destination $_.FullName -Force }
           New-Item ./zipped -Type Directory
-          Get-ChildItem -Path ./modified -Filter "*.nupkg" -Recurse | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath "./zipped/$($_.Name)" }
+          Get-ChildItem -Path "./modified" -Filter "*.nupkg" -Recurse | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath "./zipped/$($_.Name)" }
             
       - name: upload modified artifact
         uses: actions/upload-artifact@v4.3.6

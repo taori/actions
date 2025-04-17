@@ -53,16 +53,6 @@ jobs:
           Get-ChildItem -Path ./modified -Filter "README.md" -Recurse | ForEach-Object { Copy-Item ./README.md -Destination $_.FullName -Force }
           New-Item ./zipped -Type Directory
           Get-ChildItem -Path ./modified -Filter "*.nupkg" -Recurse | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath "./zipped/$($_.Name)" }
-
-      - name: delete old artifact
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.actions.deleteArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: ${{ inputs.artifactName }}
-            });
             
       - name: upload modified artifact
         uses: actions/upload-artifact@v4.3.6

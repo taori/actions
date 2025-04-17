@@ -54,23 +54,20 @@ jobs:
       - name: output artifact folder structure
         if: ${{ inputs.debugWorkflow }}
         run: ls -R ./artifact-export
-        
-        # - name: stop
-        #   run: exit 1  
 
       - name: Remove snupkg
         if: ${{ !inputs.publishSymbols }}
-        run: find artifact-export/nupkg/ -name "*.snupkg" -type f -delete
+        run: find artifact-export/ -name "*.snupkg" -type f -delete
 
       - name: Release
-        run: dotnet nuget push "artifact-export/nupkg/*.nupkg" -k ${{ secrets.nuget }} -s https://api.nuget.org/v3/index.json
+        run: dotnet nuget push "./artifact-export/*.nupkg" -k ${{ secrets.nuget }} -s https://api.nuget.org/v3/index.json
 
       - name: Remove old prereleases
         if: ${{ inputs.removePrereleases }}
         shell: pwsh
         run: |
           & dotnet tool install --global NugetUnlister
-           Get-ChildItem "artifact-export/nupkg/" -Filter "*.nupkg" | `
+           Get-ChildItem "artifact-export/" -Filter "*.nupkg" | `
            %{ $_.Name } | `
            Select-String -Pattern "(?<packageId>.+)\.(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}(?:[-\w\d.]+)?)(?=.nupkg)" | `
            %{ , @( $_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value ) } | `

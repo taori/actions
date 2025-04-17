@@ -91,8 +91,8 @@ jobs:
     with:          
       solutionPath: src/Coverage.sln
       packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
-      versionSuffix: ${{ jobs.parameters.outputs.versionSuffix }}
-      versionPrefix: ${{ jobs.parameters.outputs.versionPrefix }}
+      versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
+      versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
       buildEnv: ${{ matrix.buildEnv }}
       dotnetVersion: |
         6.0.x

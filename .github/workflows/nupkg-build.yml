@@ -49,7 +49,7 @@ on:
       concurrencyToken:
         required: false
         type: string
-        default: ci-${{ github.ref }}-${{ inputs.buildEnv}}
+        default: ci-${{ github.ref }}
         
       concurrencyAbortable:
         required: false
@@ -90,7 +90,7 @@ jobs:
       cobertura: ${{ steps.upload-cobertura.outputs.result }}
             
     concurrency:    
-      group: ${{ inputs.concurrencyToken }}
+      group: "${{ inputs.concurrencyToken }}-${{ inputs.buildEnv }}"
       cancel-in-progress: ${{ inputs.concurrencyAbortable }}      
 
     runs-on: ${{ inputs.buildEnv }}

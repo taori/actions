@@ -58,7 +58,7 @@ permissions:
 
 jobs:
   
-  build:
+  update:
     
     runs-on: ubuntu-latest
     defaults:

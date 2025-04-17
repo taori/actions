@@ -28,7 +28,7 @@ on:
 
 jobs:
   
-  build:    
+  execute:    
     runs-on: ubuntu-latest
     defaults:
       run:

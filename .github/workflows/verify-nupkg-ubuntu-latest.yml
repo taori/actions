@@ -1,4 +1,4 @@
-﻿name: nupkg-verify.yml
+﻿name: verify-nupkg.yml - ubuntu latest
 
 on:
   push:

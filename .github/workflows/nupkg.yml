@@ -81,15 +81,15 @@ on:
         type: string
         default: "nupkg-raw"
         
-permissions: 
-  contents: 
-    write
-  pull-requests: 
-    write
-  pages: 
-    write
-  id-token: 
-    write
+#permissions: 
+#  contents: 
+#    write
+#  pull-requests: 
+#    write
+#  pages: 
+#    write
+#  id-token: 
+#    write
 
 jobs:
   

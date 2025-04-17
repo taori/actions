@@ -46,7 +46,7 @@ jobs:
             core.setFailed('"nuget" secret is missing')
             
       - name: Download coverage artifact files
-      - uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.nupkgArtifactName }}
           path: ./artifact-export

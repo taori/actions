@@ -1,4 +1,4 @@
-name: Nuget (Ubuntu)
+name: publish
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: Nuget (Ubuntu)
+name: build, test and package
 
 on:
   workflow_call:
@@ -201,6 +201,8 @@ jobs:
         retention-days: 1
         
     - id: upload-cobertura
+      name: provide cobertura artifact name
       run: echo "result=${{ inputs.coberturaArtifactName }}${{ github.run_number}}" >> $GITHUB_OUTPUT
     - id: upload-nupkg
+      name: provide nupkg artifact name
       run: echo "result=${{ inputs.nupkgArtifactName }}${{ github.run_number}}" >> $GITHUB_OUTPUT     

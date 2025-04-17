@@ -111,7 +111,7 @@ jobs:
       debugWorkflow: true
   
   deploy:
-    needs: [coverage, parameters, build]
+    needs: [parameters, build, updatePackage]
     uses: ./.github/workflows/publish-nupkg.yml
     if: ${{ needs.parameters.outputs.publish == 'true' }}
     with:

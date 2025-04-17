@@ -47,9 +47,9 @@ on:
         default: "5.0.x, 6.0.x"
         
       concurrencyToken:
-        required: false
+        required: true
         type: string
-        default: ci-${{ github.ref }}-${{ inputs.buildEnv}}
+        #default: ci-${{ github.ref }}-${{ inputs.buildEnv}}
         
       concurrencyAbortable:
         required: false

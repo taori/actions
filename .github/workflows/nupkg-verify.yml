@@ -83,7 +83,7 @@ jobs:
 
   build:        
     needs: [parameters]
-    uses: ./.github/workflows/nupkg.yml
+    uses: ./.github/workflows/dotnet-package-build.yml
     with:          
       solutionPath: src/Coverage.sln
       packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj

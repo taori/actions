@@ -2,7 +2,11 @@ name: publish
 
 on:
   workflow_call:
-    inputs:          
+    inputs:      
+      nupkgArtifactName:
+        required: true
+        type: string
+        
       publishSymbols:
         required: false
         type: boolean
@@ -17,10 +21,6 @@ on:
         required: false
         type: boolean
         default: false
-      
-      nupkgArtifactName:
-        required: true
-        type: string
         
     secrets:
       nuget:

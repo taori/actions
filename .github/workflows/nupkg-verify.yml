@@ -103,14 +103,14 @@ jobs:
       threshold: ${{ needs.parameters.outputs.coverageThreshold }}
       debugWorkflow: true
   
-  deploy:
-    needs: [coverage, parameters, build]
-    uses: ./.github/workflows/publish-nupkg.yml
-    if: ${{ needs.parameters.outputs.publish == 'true' }}
-    with:
-      nupkgArtifactName: ${{ needs.build.outputs.artifact-name-nupkg }}
-      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
-      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}      
-      debugWorkflow: true
-    secrets:
-      nuget: ${{ secrets.NUGET }} 
+#  deploy:
+#    needs: [coverage, parameters, build]
+#    uses: ./.github/workflows/publish-nupkg.yml
+#    if: ${{ needs.parameters.outputs.publish == 'true' }}
+#    with:
+#      nupkgArtifactName: ${{ needs.build.outputs.artifact-name-nupkg }}
+#      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
+#      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}      
+#      debugWorkflow: true
+#    secrets:
+#      nuget: ${{ secrets.NUGET }} 

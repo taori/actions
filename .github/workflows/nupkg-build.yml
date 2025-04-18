@@ -154,7 +154,31 @@ jobs:
       run: dotnet build "${{ inputs.solutionPath }}" --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-restore 
       
     - name: Test
-      run: dotnet test "${{ inputs.solutionPath }}" --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" -property:CoverletOutputFormat=cobertura --results-directory "./coverage" ${{ inputs.testArguments }}
+      run: dotnet test "${{ inputs.solutionPath }}" --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" -property:CoverletOutputFormat=cobertura --results-directory "./coverage" --results-directory "./testResults" --logger:"trx;LogFilePrefix=testResults" ${{ inputs.testArguments }}
+
+#    - name: Publish Test Results
+#      uses: EnricoMi/publish-unit-test-result-action@v2.19.0
+#      with:
+#        fail_on: 'test failures'
+        
+    - name: Upload test results
+      if: failure()
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: "test results"
+        path: ./testResults/*.trx
+        if-no-files-found: error
+        retention-days: 1
+    
+    - name: Test Report
+      uses: dorny/test-reporter@v2
+      if: always()
+      with:
+        name: Test results
+        path: ./testResults/*.trx
+        reporter: dotnet-trx
+        fail-on-empty: 'true'
+        fail-on-error: 'true'
            
     - name: Pack with csproj version
       shell: pwsh

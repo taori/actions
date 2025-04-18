@@ -1,0 +1,176 @@
+name: coverage
+
+on:
+  workflow_call:
+    inputs:
+      coberturaArtifactsName:
+        description: 'name of the artifact that will be downloaded'
+        required: true
+        type: string
+        
+      threshold:
+        description: 'threshold used to identify whether the coverage meets the requirements in a format: "min max"'
+        required: true
+        type: string
+        default: '60 80'
+      
+      updateReadme:
+        description: 'Whether to update the readme file or not'
+        required: false
+        type: boolean
+        default: true
+      
+      readmePath:
+        type: string
+        default: "./README.md"
+      
+      updateGithubPages:
+        description: 'Whether to update github pages or not'
+        required: false
+        type: boolean
+        default: true
+      
+      githubPagesUrl:
+        required: false
+        type: string
+      
+      generateStickyNote:
+        description: 'Whether to display a sticky note in a PR discussion'
+        required: false
+        type: boolean
+        default: true
+      
+      debugWorkflow:
+        required: false
+        type: boolean
+        default: false
+      
+
+permissions:
+  contents:
+    write
+  pull-requests:
+    write
+  pages:
+    write
+  id-token:
+    write
+
+jobs:
+  
+  update:
+    
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+
+      - uses: actions/checkout@v4.1.7
+        if: ${{ inputs.updateReadme }}
+        with:
+          persist-credentials: true
+          repository: ${{ github.event.pull_request.head.repo.full_name }} # required for commit
+          ref: ${{ github.event.pull_request.head.ref }} # required for commit
+          
+      - name: Download coverage artifact files
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.coberturaArtifactsName }}
+          path: ./artifact-export
+          
+      - name: output artifact folder structure
+        if: ${{ inputs.debugWorkflow }}
+        run: ls -R ./artifact-export
+
+      - name: generate reports from source files
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.3.8
+        with:
+          reports: ./artifact-export/**/coverage.cobertura.xml
+          targetdir: ./coveragereport
+          reporttypes: Html_Dark;Cobertura
+
+      - name: upload results of report generation
+        if: ${{ inputs.debugWorkflow }}
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: reportgenerator
+          path: ./coveragereport/*.*
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: generate MD summary
+        uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 #v1.3.0
+        with:
+          filename: ./coveragereport/Cobertura.xml
+          badge: true
+          fail_below_min: true
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: ${{ inputs.threshold }}
+
+      - name: upload MD summary
+        if: ${{ inputs.debugWorkflow }}
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: irongut report
+          path: code-coverage-results.md
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 #v2
+        if: ${{ inputs.generateStickyNote }}
+        with:
+          recreate: true
+          path: code-coverage-results.md
+
+      - name: read coverage result
+        shell: pwsh
+        id: codecoverageread
+        run: |
+          $content = Get-Content -Path 'code-coverage-results.md' -Raw  
+          echo 'content<<EOF' >> $env:GITHUB_OUTPUT
+          echo "$content" >> $env:GITHUB_OUTPUT
+          echo "[Coverage details](${{ inputs.githubPagesUrl }})" >> $env:GITHUB_OUTPUT
+          echo 'EOF' >> $env:GITHUB_OUTPUT
+
+      - name: Write to Job Summary
+        shell: pwsh
+        run: |
+          # echo 'content<<EOF' >> $env:GITHUB_STEP_SUMMARY
+           echo "${{ steps.codecoverageread.outputs.content }}" >> $env:GITHUB_STEP_SUMMARY
+          # echo 'EOF' >> $env:GITHUB_STEP_SUMMARY
+          
+      - name: Update coverage report in Readme.MD
+        if: ${{ inputs.updateReadme && inputs.readmePath != '' }}
+        shell: pwsh
+        run: |
+          $insertion = "${{ steps.codecoverageread.outputs.content }}"        
+          (Get-Content "${{ inputs.readmePath }}" -Raw) -replace '<!--CoverageStart-->(?:[\s]|.)+<!--CoverageEnd-->',"<!--CoverageStart-->`n$insertion`n<!--CoverageEnd-->" | Out-File "${{ inputs.readmePath }}" -NoNewLine
+          #(Get-Content "${{ inputs.updateReadmePath }}" -Raw)
+
+      - name: Push changes
+        uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 #v9.1.4
+        if: ${{ inputs.updateReadme }}
+        with:
+          default_author: github_actions
+          add: ./README.md
+          message: 'Coverage report in Readme.MD updated'
+
+      - name: Upload GitHub Pages artifact
+        if: ${{ inputs.updateGithubPages }}
+        uses: actions/upload-pages-artifact@v3.0.1
+        with:
+          name: coverage
+          path: ./coveragereport
+
+      - name: Deploy GitHub Pages site
+        if: ${{ inputs.updateGithubPages }}
+        uses: actions/deploy-pages@v4.0.5
+        with:
+          artifact_name: coverage

@@ -1,4 +1,4 @@
-﻿name: nupkg-verify.yml
+﻿name: verify-nupkg.yml - ubuntu latest
 
 on:
   push:
@@ -20,20 +20,15 @@ on:
 jobs:
 
   parameters:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
     
     outputs:
-      versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
-      versionPrefix : ${{ steps.parameters.outputs.versionPrefix }}
-      configuration : ${{ steps.parameters.outputs.configuration }}
-      verbosity : ${{ steps.parameters.outputs.verbosity }}
       publish : ${{ steps.parameters.outputs.publish }}
-      package : ${{ steps.parameters.outputs.package }}
       publishSymbols : ${{ steps.parameters.outputs.publishSymbols }}
       removePrereleases : ${{ steps.parameters.outputs.removePrereleases }}
-      skipTests : ${{ steps.parameters.outputs.skipTests }}
-      runCoverage : ${{ steps.parameters.outputs.runCoverage }}
       coverageThreshold : ${{ steps.parameters.outputs.coverageThreshold }}
+      versionPrefix : ${{ steps.parameters.outputs.versionPrefix }}
+      versionSuffix : ${{ steps.parameters.outputs.versionSuffix }}
 
     steps:
 
@@ -67,14 +62,9 @@ jobs:
           $values = @(
               @("versionSuffix",      "$suffix",                                      "$suffix"),
               @("versionPrefix",      "${{github.event.inputs.versionPrefix}}",       ""),
-              @("configuration",      "Release",       "Release"),
-              @("verbosity",          "minimal",                                      "minimal"),
               @("publish",            "${{github.event.inputs.publish}}",             "false"),
-              @("package",            "${{github.event.inputs.package}}",             "true"),
               @("publishSymbols",     "${{github.event.inputs.publishSymbols}}",      "false"),
               @("removePrereleases",  "${{github.event.inputs.removePrereleases}}",   "false"),
-              @("skipTests",          "${{github.event.inputs.skipTests}}",           "false"),
-              @("runCoverage",        "${{github.event.inputs.runCoverage}}",         "true"),
               @("coverageThreshold",  "${{github.event.inputs.coverageThreshold}}",   "60 80")
           )
           
@@ -89,54 +79,47 @@ jobs:
               Write-Host "Setting parameter $($pair[0]) => $value"
               #echo "::set-output name=$($pair[0])::$value"
               echo "$($pair[0])=$value" >> $env:GITHUB_OUTPUT
-          }     
+          }    
 
-  ubuntu-22-04-nupkg:
-    needs: parameters
-    uses: ./.github/workflows/nupkg.yml
-    with:
+  build:        
+    needs: [parameters]
+    uses: ./.github/workflows/nupkg-build.yml
+    with:          
       solutionPath: src/Coverage.sln
       packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
       versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
       versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
-      package: ${{ needs.parameters.outputs.package == 'true' }}
-      publish: ${{ needs.parameters.outputs.publish == 'true' }}
-      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
-      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
-      skipTests: ${{ needs.parameters.outputs.skipTests == 'true' }}
-      configuration: ${{ needs.parameters.outputs.configuration }}
-      verbosity: ${{ needs.parameters.outputs.verbosity }}
-      runCoverage: ${{ needs.parameters.outputs.runCoverage == 'true' }}
-      coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
-      concurrencyAbortable: false
-      agentEnv: ubuntu-22.04
+      buildEnv: "ubuntu-latest"
       dotnetVersion: |
         6.0.x
-        8.0.x
+        8.0.x   
+        
+  coverage:
+    needs: [build, parameters]
+    uses: ./.github/workflows/coverage.yml
+    with:
+      coberturaArtifactsName: ${{ needs.build.outputs.artifact-name-cobertura }}
+      threshold: ${{ needs.parameters.outputs.coverageThreshold }}
+      debugWorkflow: true 
+        
+  updatePackage:
+    needs: [build, coverage]
+    uses: ./.github/workflows/nupkg-update-readme.yml
+    with:
+      artifactName: ${{ needs.build.outputs.artifact-name-nupkg }}
+      newArtifactName: "${{ needs.build.outputs.artifact-name-nupkg }}-patched"
+      readmePath: "./README.md"
+      readmeFileName: "README.md"
+      debugWorkflow: true
+  
+  deploy:
+    needs: [parameters, build, updatePackage]
+    uses: ./.github/workflows/nupkg-publish.yml
+    if: ${{ needs.parameters.outputs.publish == 'true' }}
+    with:
+      nupkgArtifactName: "${{ needs.build.outputs.artifact-name-nupkg }}-patched"
+      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
+      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}      
+      debugWorkflow: true
     secrets:
       nuget: ${{ secrets.NUGET }} 
-      
-  ubuntu-latest-nupkg:
-    needs: parameters
-    uses: ./.github/workflows/nupkg.yml
-    with:
-      solutionPath: src/Coverage.sln
-      packProjects: src/composite1/composite1.csproj;src/composite2/composite2.csproj
-      versionSuffix: ${{ needs.parameters.outputs.versionSuffix }}
-      versionPrefix: ${{ needs.parameters.outputs.versionPrefix }}
-      package: ${{ needs.parameters.outputs.package == 'true' }}
-      publish: ${{ needs.parameters.outputs.publish == 'true' }}
-      publishSymbols: ${{ needs.parameters.outputs.publishSymbols == 'true' }}
-      removePrereleases: ${{ needs.parameters.outputs.removePrereleases == 'true' }}
-      skipTests: ${{ needs.parameters.outputs.skipTests == 'true' }}
-      configuration: ${{ needs.parameters.outputs.configuration }}
-      verbosity: ${{ needs.parameters.outputs.verbosity }}
-      runCoverage: ${{ needs.parameters.outputs.runCoverage == 'true' }}
-      coverageThreshold: ${{ needs.parameters.outputs.coverageThreshold }}
-      concurrencyAbortable: false
-      agentEnv: ubuntu-latest
-      dotnetVersion: |
-        6.0.x
-        8.0.x
-    secrets:
-      nuget: ${{ secrets.NUGET }}

@@ -1,0 +1,217 @@
+name: build, test and package
+
+on:
+  workflow_call:
+    outputs:
+      artifact-name-cobertura:
+        description: "The name of the cobertura artifact reference"
+        value: ${{ jobs.execute.outputs.cobertura }}
+        
+      artifact-name-nupkg:
+        description: "The name of the nupkg artifact reference"
+        value: ${{ jobs.execute.outputs.nupkg }}
+        
+    inputs:      
+      packProjects:
+        type: string
+        required: true
+        description: 'expects a syntax like: "Path1;Path2"'
+      
+      solutionPath:
+        required: true
+        type: string
+        
+      versionSuffix:
+        required: false
+        type: string
+        default: ""
+        
+      versionPrefix:
+        required: false
+        type: string
+        default: ""
+                
+      configuration:
+        required: false
+        type: string
+        default: "Release"
+        
+      verbosity:
+        required: false
+        type: string
+        default: "minimal"    
+        
+      dotnetVersion:
+        required: false
+        type: string
+        default: "5.0.x, 6.0.x"
+        
+      concurrencyToken:
+        required: false
+        type: string
+        default: ci-${{ github.ref }}
+        
+      concurrencyAbortable:
+        required: false
+        type: boolean
+        default: true
+        
+      debugWorkflow:
+        required: false
+        type: boolean
+        default: false
+        
+      testArguments:
+        required: false
+        type: string
+        default: ""
+        
+      buildEnv:
+        required: false
+        type: string
+        default: "ubuntu-latest"  
+        
+      coberturaArtifactName:
+        required: false
+        type: string
+        default: "cobertura-raw"
+      
+      nupkgArtifactName:
+        required: false
+        type: string
+        default: "nupkg-raw"
+
+jobs:
+  
+  execute:
+    
+    outputs:
+      nupkg: ${{ steps.upload-nupkg.outputs.result }}
+      cobertura: ${{ steps.upload-cobertura.outputs.result }}
+            
+    concurrency:    
+      group: "${{ inputs.concurrencyToken }}-${{ inputs.buildEnv }}"
+      cancel-in-progress: ${{ inputs.concurrencyAbortable }}      
+
+    runs-on: ${{ inputs.buildEnv }}
+    defaults:
+      run:
+        shell: bash
+    
+    env:            
+      DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    steps:
+      
+      # - name: stop
+      #   run: exit 1
+    
+    - name: environment
+      id: environment
+      shell: bash
+      run: |
+        REPOSITORY_NAME="${{ github.repository }}"
+        OWNER=$(echo $REPOSITORY_NAME | cut -d'/' -f1)
+        REPO=$(echo $REPOSITORY_NAME | cut -d'/' -f2)
+        echo "updateRepo=${{ (github.ref_name == github.event.repository.default_branch && (github.event.pull_request.merged == true || github.event_name == 'push' )) }}" >> "$GITHUB_OUTPUT" 
+        echo "refName=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+        echo "eventName=${{ github.event_name }}" >> "$GITHUB_OUTPUT"
+        echo "merged=${{ github.event.pull_request.merged || false }}" >> "$GITHUB_OUTPUT"
+        echo "defaultBranch=${{ github.event.repository.default_branch }}" >> "$GITHUB_OUTPUT"
+          
+        if [[ "$REPO" == "$OWNER.github.io" ]]; then        
+          echo "pageURL=https://$OWNER.github.io" >> "$GITHUB_OUTPUT"
+        else
+          echo "pageURL=https://$OWNER.github.io/$REPO" >> "$GITHUB_OUTPUT"
+        fi        
+
+    - name: Dump environment outputs
+      if: ${{ inputs.debugWorkflow }}
+      run: echo "${{ toJson( steps.environment.outputs) }}" > env_outputs.json
+      
+    - name: Display environment outputs
+      if: ${{ inputs.debugWorkflow }}
+      run: cat env_outputs.json
+        
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4.0.1
+      with:
+        dotnet-version: ${{ inputs.dotnetVersion }}
+      
+    - uses: actions/checkout@v4.1.7
+      with: 
+        persist-credentials: true
+        repository: ${{ github.event.pull_request.head.repo.full_name }} # required for commit
+        ref: ${{ github.event.pull_request.head.ref }} # required for commit
+
+    - name: Restore dependencies
+      run: dotnet restore "${{ inputs.solutionPath }}" --ignore-failed-sources
+      
+    - name: Build
+      run: dotnet build "${{ inputs.solutionPath }}" --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-restore 
+      
+    - name: Test
+      run: dotnet test "${{ inputs.solutionPath }}" --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" -property:CoverletOutputFormat=cobertura --results-directory "./testResults" --logger:"trx;LogFilePrefix=testResults" ${{ inputs.testArguments }}
+        
+    - name: Upload test results
+      if: failure()
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: "test results"
+        path: ./testResults/testResults*.trx
+        if-no-files-found: error
+        retention-days: 1
+    
+    - name: Test Report
+      uses: dorny/test-reporter@v2
+      if: always()
+      with:
+        name: Test results
+        path: ./testResults/testResults*.trx
+        reporter: dotnet-trx
+        fail-on-empty: 'true'
+        fail-on-error: 'true'
+           
+    - name: Pack with csproj version
+      shell: pwsh
+      if: ${{ inputs.versionPrefix == '' }}
+      run: |
+        $projects = "${{ inputs.packProjects }}".Split(";")
+        foreach($project in $projects){
+          dotnet pack $project --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} -o artifacts/nupkg --no-build /p:VersionSuffix=${{ inputs.versionSuffix }}
+        }        
+         
+    - name: Pack manual version
+      shell: pwsh
+      if: ${{ inputs.versionPrefix != '' }}
+      run: |
+        $projects = "${{ inputs.packProjects }}".Split(";")
+        foreach($project in $projects){
+          dotnet pack $project --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} -o artifacts/nupkg --no-build /p:VersionSuffix=${{ inputs.versionSuffix }} /p:VersionPrefix=${{ inputs.versionPrefix }}
+        }   
+        
+    - name: Upload cobertura artifacts
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: "${{ inputs.coberturaArtifactName }}${{ github.run_number}}"
+        path: ./testResults/**/coverage.cobertura.xml
+        if-no-files-found: error
+        retention-days: 1  
+        
+    - name: Upload nupkg artifacts
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: "${{ inputs.nupkgArtifactName }}${{ github.run_number}}"
+        path: ./artifacts/nupkg/*.nupkg
+        if-no-files-found: error
+        retention-days: 1
+        
+    - id: upload-cobertura
+      name: provide cobertura artifact name
+      run: echo "result=${{ inputs.coberturaArtifactName }}${{ github.run_number}}" >> $GITHUB_OUTPUT
+    - id: upload-nupkg
+      name: provide nupkg artifact name
+      run: echo "result=${{ inputs.nupkgArtifactName }}${{ github.run_number}}" >> $GITHUB_OUTPUT     

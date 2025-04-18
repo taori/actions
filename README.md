@@ -12,7 +12,7 @@ composite2 | 100% | 100% | ✔
 
 _Minimum allowed line rate is 60%_
 
-[Coverage details](https://taori.github.io/actions)
+[Coverage details]()
 <!--CoverageEnd-->
 
 

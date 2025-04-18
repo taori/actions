@@ -1,0 +1,85 @@
+name: update nupkg readme
+
+on:
+  workflow_call:
+    
+    inputs:
+      readmePath:
+        description: 'The path to the readme file within the repo'
+        type: string
+        required: true
+        
+      readmeFileName:
+        description: 'The name of the readme file - e.g. README.md'
+        type: string
+        required: true
+        
+      artifactName:
+        description: 'name of the artifact that contains the nuget packages'
+        type: string
+        required: true
+        
+      newArtifactName:
+        description: 'name of the artifact that contains the nuget packages'
+        type: string
+        required: true
+      
+      debugWorkflow:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  
+  update:
+    
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+
+      - uses: actions/checkout@v4.1.7
+        with:
+          persist-credentials: true
+          repository: ${{ github.event.pull_request.head.repo.full_name }} # required for commit
+          ref: ${{ github.event.pull_request.head.ref }} # required for commit  
+          
+      - name: Download nupkg artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifactName }}
+          path: ./artifact-export
+
+      - name: output artifact folder structure
+        if: ${{ inputs.debugWorkflow }}
+        run: ls -R ./artifact-export
+          
+      - name: unzip packages
+        shell: pwsh
+        run: Get-ChildItem -Path ./artifact-export -Filter "*.nupkg" | ForEach-Object { Expand-Archive -Path $_.FullName -DestinationPath "./unzipped/$($_.Name)/" }
+
+      - name: modify contents
+        shell: pwsh
+        run: |
+          Copy-Item -Recurse -Path ./unzipped -Destination ./modified
+          Get-ChildItem -Path "./modified" -Filter "${{ inputs.readmeFileName }}" -Recurse | ForEach-Object { Copy-Item "${{ inputs.readmePath }}" -Destination $_.FullName -Force }
+          New-Item ./zipped -Type Directory
+          Get-ChildItem -Path "./modified" -Filter "*.nupkg" -Recurse | ForEach-Object { Write-Host "Zipping $($_.FullName)" -ForegroundColor Green; Compress-Archive -Path "$($_.FullName)/*" -DestinationPath "./zipped/$($_.Name)" }
+
+      - name: output folder structure - modified
+        if: ${{ inputs.debugWorkflow }}
+        run: ls -R ./modified
+        
+      - name: output folder structure - zipped
+        if: ${{ inputs.debugWorkflow }}
+        run: ls -R ./zipped
+            
+      - name: upload modified artifact
+        uses: actions/upload-artifact@v4.3.6
+        with:
+          name: "${{ inputs.newArtifactName }}"
+          path: ./zipped/*.nupkg
+          if-no-files-found: error
+          retention-days: 1

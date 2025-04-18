@@ -1,0 +1,75 @@
+name: publish
+
+on:
+  workflow_call:
+    inputs:      
+      nupkgArtifactName:
+        required: true
+        type: string
+        
+      publishSymbols:
+        required: false
+        type: boolean
+        default: true
+      
+      removePrereleases:
+        required: false
+        type: boolean
+        default: false
+      
+      debugWorkflow:
+        required: false
+        type: boolean
+        default: false
+        
+    secrets:
+      nuget:
+        required: true
+
+jobs:
+  
+  execute:    
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+
+      - name: nuget secret verification
+        env:
+          NUGET: ${{ secrets.nuget }}
+        if: "${{ env.NUGET == '' }}"
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('"nuget" secret is missing')
+            
+      - name: Download coverage artifact files
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.nupkgArtifactName }}
+          path: ./artifact-export
+
+      - name: output artifact folder structure
+        if: ${{ inputs.debugWorkflow }}
+        run: ls -R ./artifact-export
+
+      - name: Remove snupkg
+        if: ${{ !inputs.publishSymbols }}
+        run: find artifact-export/ -name "*.snupkg" -type f -delete
+
+      - name: Release
+        run: dotnet nuget push "./artifact-export/*.nupkg" -k ${{ secrets.nuget }} -s https://api.nuget.org/v3/index.json
+
+      - name: Remove old prereleases
+        if: ${{ inputs.removePrereleases }}
+        shell: pwsh
+        run: |
+          & dotnet tool install --global NugetUnlister
+           Get-ChildItem "artifact-export/" -Filter "*.nupkg" | `
+           %{ $_.Name } | `
+           Select-String -Pattern "(?<packageId>.+)\.(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}(?:[-\w\d.]+)?)(?=.nupkg)" | `
+           %{ , @( $_.Matches[0].Groups["packageId"].Value, $_.Matches[0].Groups["version"].Value ) } | `
+           % { Write-Output "nuget-unlist drop prereleasebefore $($_[0]) $($_[1]) ${{ secrets.nuget }}" `
+             & nuget-unlist drop prereleasebefore $_[0] $_[1] ${{ secrets.nuget }} }

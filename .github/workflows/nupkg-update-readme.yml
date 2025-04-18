@@ -66,7 +66,7 @@ jobs:
           Copy-Item -Recurse -Path ./unzipped -Destination ./modified
           Get-ChildItem -Path "./modified" -Filter "${{ inputs.readmeFileName }}" -Recurse | ForEach-Object { Copy-Item "${{ inputs.readmePath }}" -Destination $_.FullName -Force }
           New-Item ./zipped -Type Directory
-          Get-ChildItem -Path "./modified" -Filter "*.nupkg" -Recurse | ForEach-Object { Compress-Archive -Path $_.FullName -DestinationPath "./zipped/$($_.Name)" }
+          Get-ChildItem -Path "./modified" -Filter "*.nupkg" -Recurse | ForEach-Object { Write-Host "Zipping $($_.FullName)" -ForegroundColor Green; Compress-Archive -Path "$($_.FullName)/*" -DestinationPath "./zipped/$($_.Name)" }
 
       - name: output folder structure - modified
         if: ${{ inputs.debugWorkflow }}

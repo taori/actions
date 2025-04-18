@@ -155,11 +155,6 @@ jobs:
       
     - name: Test
       run: dotnet test "${{ inputs.solutionPath }}" --verbosity ${{ inputs.verbosity }} -c ${{ inputs.configuration }} --no-build --collect:"XPlat Code Coverage" -property:CoverletOutputFormat=cobertura --results-directory "./testResults" --logger:"trx;LogFilePrefix=testResults" ${{ inputs.testArguments }}
-
-#    - name: Publish Test Results
-#      uses: EnricoMi/publish-unit-test-result-action@v2.19.0
-#      with:
-#        fail_on: 'test failures'
         
     - name: Upload test results
       if: failure()

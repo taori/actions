@@ -122,12 +122,6 @@ jobs:
         echo "eventName=${{ github.event_name }}" >> "$GITHUB_OUTPUT"
         echo "merged=${{ github.event.pull_request.merged || false }}" >> "$GITHUB_OUTPUT"
         echo "defaultBranch=${{ github.event.repository.default_branch }}" >> "$GITHUB_OUTPUT"
-          
-        if [[ "$REPO" == "$OWNER.github.io" ]]; then        
-          echo "pageURL=https://$OWNER.github.io" >> "$GITHUB_OUTPUT"
-        else
-          echo "pageURL=https://$OWNER.github.io/$REPO" >> "$GITHUB_OUTPUT"
-        fi        
 
     - name: Dump environment outputs
       if: ${{ inputs.debugWorkflow }}
@@ -136,23 +130,6 @@ jobs:
     - name: Display environment outputs
       if: ${{ inputs.debugWorkflow }}
       run: cat env_outputs.json
-
-    - name: Harden Runner
-      uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
-      with:
-        egress-policy: block
-        allowed-endpoints: >
-          api.github.com:443
-          api.nuget.org:443
-          auth.docker.io:443
-          fulcio.sigstore.dev:443
-          ghcr.io:443
-          github.com:443
-          mcr.microsoft.com:443
-          pipelines.actions.githubusercontent.com:443
-          pkg-containers.githubusercontent.com:443
-          registry-1.docker.io:443
-          storage.googleapis.com:443
       
     - uses: actions/checkout@v4.1.7
       with: 

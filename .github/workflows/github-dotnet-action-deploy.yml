@@ -47,23 +47,6 @@ jobs:
 
     steps:
 
-      - name: Harden Runner
-        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
-        with:
-          egress-policy: block
-          allowed-endpoints: >
-            api.github.com:443
-            api.nuget.org:443
-            auth.docker.io:443
-            fulcio.sigstore.dev:443
-            ghcr.io:443
-            github.com:443
-            mcr.microsoft.com:443
-            pipelines.actions.githubusercontent.com:443
-            pkg-containers.githubusercontent.com:443
-            registry-1.docker.io:443
-            storage.googleapis.com:443
-
       - name: Install Cosign
         uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b
         with:

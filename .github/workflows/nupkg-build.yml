@@ -136,6 +136,23 @@ jobs:
     - name: Display environment outputs
       if: ${{ inputs.debugWorkflow }}
       run: cat env_outputs.json
+
+    - name: Harden Runner
+      uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34
+      with:
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          api.nuget.org:443
+          auth.docker.io:443
+          fulcio.sigstore.dev:443
+          ghcr.io:443
+          github.com:443
+          mcr.microsoft.com:443
+          pipelines.actions.githubusercontent.com:443
+          pkg-containers.githubusercontent.com:443
+          registry-1.docker.io:443
+          storage.googleapis.com:443
       
     - uses: actions/checkout@v4.1.7
       with: 
@@ -175,7 +192,7 @@ jobs:
         retention-days: 1
     
     - name: Test Report
-      uses: dorny/test-reporter@v2
+      uses: dorny/test-reporter@6e6a65b7a0bd2c9197df7d0ae36ac5cee784230c #v2.0.0
       if: always()
       with:
         name: Test results

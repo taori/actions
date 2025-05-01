@@ -32,6 +32,11 @@ on:
         description: "Whether to use signing. defaults to false"
         default: false
         type: boolean
+        
+      checkoutRef:
+        description: "Git ref of deployment"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -62,7 +67,7 @@ jobs:
         with:
           persist-credentials: true
           repository: ${{ github.event.pull_request.head.repo.full_name }} # required for commit
-          ref: ${{ github.event.pull_request.head.ref }} # required for commit
+          ref: ${{ inputs.checkoutRef }} # required for commit
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@8c0edbc76e98fa90f69d9a2c020dcb50019dc325

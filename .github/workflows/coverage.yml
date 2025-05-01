@@ -159,6 +159,8 @@ jobs:
         if: ${{ inputs.updateReadme }}
         with:
           default_author: github_actions
+          pull: true
+          push: true
           add: ./README.md
           message: 'Coverage report in Readme.MD updated'
 

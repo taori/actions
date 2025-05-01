@@ -13,6 +13,12 @@ on:
         default: ${{ github.repository }}
         type: string
         
+      imageTags:
+        description: "version of the image. defaults to 'v1.0.0'"
+        default: 'v1.0.0'
+        type: string
+        required: true
+      
       dockerFilePath:
         description: "Path to the docker file. defaults to './Dockerfile'"
         default: "./Dockerfile"
@@ -93,8 +99,8 @@ jobs:
           context: ${{ inputs.dockerFileContext }}
           file: ${{ inputs.dockerFilePath }}
           push: ${{ inputs.push }}
-          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ inputs.imageTags }}
 
       # Sign the Docker image digest
       # Uses the identity token to provision an ephemeral certificate against the community Fulcio instance
